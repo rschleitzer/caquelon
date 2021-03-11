@@ -1,0 +1,20 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net5.0</TargetFramework>
+    <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <Version>0.0.0-beta</Version>
+    <PackageLicenseFile>LICENSE</PackageLicenseFile>
+  </PropertyGroup>
+  <ItemGroup>
+    <None Include="..\..\LICENSE">
+      <Pack>True</Pack>
+      <PackagePath></PackagePath>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Scaly.Compiler" Version="0.0.2-beta" />
+  </ItemGroup>
+
+</Project>
