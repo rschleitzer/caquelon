@@ -7,9 +7,15 @@ namespace tests
     public class CaquelonTests
     {
         [TestMethod]
-        public void ParserTest()
+        public void Parser()
         {
-            var operation = new Parser("false").parse_operation();
+            new Parser("false").parse_operation();
+        }
+
+        [TestMethod]
+        public void BuildLibrary()
+        {
+            Transpiler.BuildLibrary("LibraryTest.cql");
         }
     }
 }

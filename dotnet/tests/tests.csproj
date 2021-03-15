@@ -21,4 +21,10 @@
     <ProjectReference Include="..\transpiler\Fondue.Caquelon.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Update="LibraryTest.cql">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
 </Project>
