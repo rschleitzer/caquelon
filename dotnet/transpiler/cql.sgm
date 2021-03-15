@@ -1,0 +1,255 @@
+  <!DOCTYPE grammar SYSTEM "grammar.dtd">
+
+  <grammar>
+
+    <syntax id = Program                                        program
+        <content link = File                  multiple          property = files
+
+    <syntax id = File                                           top
+        <content link = Library                        optional property = library
+        <content link = Using                 multiple optional property = usings
+        <content link = Include               multiple optional property = includes
+        <content link = Definition            multiple optional property = definitions
+
+    <syntax id = Library
+        <content link = library
+        <content link = Name                                    property = name
+        <content link = Version                        optional property = version
+
+    <syntax id = Name
+        <content identifier                                     property = name
+        <content link = Extension             multiple optional property = extensions
+
+    <syntax id = Extension                    multiple
+        <content link = dot
+        <content identifier                                     property = name
+
+    <syntax id = Version
+        <content link = version
+        <content literal                                        property = name
+
+    <syntax id = Using                        multiple
+        <content link = using
+        <content identifier                                     property = model
+        <content link = Version                        optional property = version
+
+    <syntax id = Include                      multiple
+        <content link = include
+        <content link = Name                                    property = name
+        <content link = Version                        optional property = version
+        <content link = Called                         optional property = called
+
+    <syntax id = Called
+        <content link = called
+        <content literal                                        property = name
+
+    <syntax id = Declaration                  multiple abstract
+        <content link = PublicDeclaration
+        <content link = PrivateDeclaration
+        <content link = CodeSystem
+        <content link = ValueSet
+        <content link = Code
+        <content link = Concept
+        <content link = Parameter
+
+    <syntax id = PrivateDeclaration
+        <content link = private
+        <content link = Declaration                             property = declaration
+
+    <syntax id = PublicDeclaration
+        <content link = private
+        <content link = Declaration                             property = export
+
+    <syntax id = CodeSystem
+        <content link = codesystem
+        <content identifier                                     property = name
+        <content link = colon
+        <content literal                                        property = id
+        <content link = Version                        optional property = version
+
+    <syntax id = ValueSet
+        <content link = valueset
+        <content identifier                                     property = name
+        <content link = colon
+        <content literal                                        property = id
+        <content link = Version                        optional property = version
+        <content link = CodeSystem                     optional property = codeSystems
+
+    <syntax id = CodeSystems
+        <content link = codesystems
+        <content link = left_curly
+        <content link = CodeIdentifier        multiple          property = identifiers
+        <content link = right_curly
+
+    <syntax id = CodeIdentifier               multiple
+        <content identifier                                     property = identifier
+        <content link = Extension                      optional property = extension
+        <content link = comma                          optional
+
+    <syntax id = Code
+        <content link = code
+        <content identifier                                     property = name
+        <content link = colon
+        <content literal                                        property = id
+        <content link = from
+        <content link = CodeIdentifier                          property = version
+        <content link = Display                        optional property = display
+
+    <syntax id = Display
+        <content link = display
+        <content literal                                        property = id
+
+    <syntax id = Concept
+        <content link = concept
+        <content identifier                                     property = name
+        <content link = colon
+        <content link = left_curly
+        <content link = CodeIdentifier        multiple          property = identifiers
+        <content link = right_curly
+        <content link = Display                        optional property = display
+
+    <syntax id = Parameter
+        <content link = parameter
+        <content identifier                                     property = name
+        <content link = TypeSpec                       optional property = type
+        <content link = Default                        optional property = defaultValue
+
+    <syntax id = TypeSpec                     multiple abstract
+        <content link = Tuple
+        <content link = Type
+
+    <syntax id = Type
+        <content link = colon
+        <content link = Name                                    property = name
+        <content link = GenericArguments               optional property = generics
+
+    <syntax id = GenericArguments
+        <content link = left_angular
+        <content link = GenericArgument       multiple optional property = generics
+        <content link = right_angular
+
+    <syntax id = GenericArgument              multiple
+        <content link = Type                                    property = spec
+        <content link = comma                          optional
+
+    <syntax id = Tuple
+        <content link = left_curly
+        <content link = Element               multiple optional property = members
+        <content link = right_curly
+
+    <syntax id = Element                      multiple
+        <content identifier                                     property = name
+        <content link = TypeSpec                                property = typeSpec
+        <content link = comma                          optional
+
+    <syntax id = Default
+        <content link = default
+        <content link = Expression                     optional property = members
+
+    <syntax id = Statement                    multiple abstract
+        <content link = Context
+        <content link = Define
+        <content link = Function
+
+    <syntax id = Context
+        <content link = context
+        <content link = Name                                    property = name
+
+    <syntax id = Define
+        <content link = define
+        <content link = AccessModifier                 optional property = accessModifier
+        <content link = Definition                              property = definition
+
+    <syntax id = AccessModifier                        abstract
+        <content link = Private
+        <content link = Public
+
+    <syntax id = Private
+        <content link = private
+
+    <syntax id = Public
+        <content link = public
+
+    <syntax id = Definition                   multiple abstract
+        <content link = Item
+        <content link = Function
+
+    <syntax id = Item
+        <content identifier                                     property = name
+        <content link = colon
+        <content link = Operation                               property = operation
+
+    <syntax id = Function
+        <content link = function
+        <content identifier                                     property = name
+        <content link = left_paren
+        <content link = Element               multiple optional property = operands
+        <content link = right_paren
+        <content link = Returns                        optional property = returns
+        <content link = Implementation                          property = implementation
+
+    <syntax id = Returns
+        <content link = returns
+        <content link = TypeSpec                                property = type
+
+    <syntax id = Implementation                        abstract
+        <content link = Operation
+        <content link = External
+
+    <syntax id = External
+        <content link = external
+
+    <syntax id = Operation
+        <content link = Operand               multiple          property = operands
+        <content colon                                 optional
+
+    <syntax id = Operand                      multiple
+        <content link = Expression                              property = expression
+        <content link = MemberAccess          multiple optional property = postfixes
+
+    <syntax id = MemberAccess                 multiple
+        <content link = dot
+        <content link = Name                                    property = member
+
+    <syntax id = Expression                            abstract
+        <content link = Literal
+        <content link = Name
+
+    <syntax id = Literal
+        <content literal                                        property = literal
+
+    <keyword id = called
+    <keyword id = code
+    <keyword id = codesystem
+    <keyword id = codesystems
+    <keyword id = concept
+    <keyword id = context
+    <keyword id = default
+    <keyword id = define
+    <keyword id = display
+    <keyword id = external
+    <keyword id = from
+    <keyword id = function
+    <keyword id = include
+    <keyword id = library
+    <keyword id = parameter
+    <keyword id = private
+    <keyword id = public
+    <keyword id = returns
+    <keyword id = using
+    <keyword id = valueset
+    <keyword id = version
+
+    <punctuation id = dot               value = "."
+    <punctuation id = colon             value = ":"
+    <punctuation id = comma             value = ","
+    <punctuation id = left_paren        value = "("
+    <punctuation id = right_paren       value = ")"
+    <punctuation id = left_curly        value = "{"
+    <punctuation id = right_curly       value = "}"
+    <punctuation id = left_bracket      value = "["
+    <punctuation id = right_bracket     value = "]"
+    <punctuation id = left_angular      value = "<"
+    <punctuation id = right_angular     value = ">"
+
+  </grammar>

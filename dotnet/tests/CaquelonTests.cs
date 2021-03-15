@@ -1,5 +1,5 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Scaly.Compiler;
+using Fondue.Caquelon;
 
 namespace tests
 {
@@ -7,9 +7,9 @@ namespace tests
     public class CaquelonTests
     {
         [TestMethod]
-        public void TestShortest()
+        public void ParserTest()
         {
-            Assert.AreEqual(Compiler.compileAndRunProgram("42", new string[] { }), 42);
+            var operation = new Parser("false").parse_operation();
         }
     }
 }
