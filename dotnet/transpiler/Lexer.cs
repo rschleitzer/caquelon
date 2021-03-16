@@ -25,7 +25,7 @@ namespace Fondue.Caquelon
             line = 1;
             column = 0;
             read_character();
-            skip_whitespace(true);
+            skip_whitespace();
         }
 
         void read_character()
@@ -56,7 +56,7 @@ namespace Fondue.Caquelon
 
         public void advance()
         {
-            skip_whitespace(false);
+            skip_whitespace();
             previous_line = line;
             previous_column = column;
 
@@ -81,15 +81,6 @@ namespace Fondue.Caquelon
 
             switch (c)
             {
-                case '\n':
-                    token = scan_line_feed();
-                    break;
-
-                case ':':
-                    read_character();
-                    token = new Colon();
-                    break;
-
                 case ';':
                     read_character();
                     token = new Semicolon();
@@ -116,25 +107,15 @@ namespace Fondue.Caquelon
                     break;
                 }
 
-                case '\"': token = scan_string_literal(); break;
-                case '\'': token = scan_string_identifier(); break;
+                case '\'': token = scan_string_literal(); break;
+                case '\"': token = scan_string_identifier(); break;
                 case '`':  token = scan_fragment_literal(); break;
 
-                case '}': case ')': case ']': case '.': case '?':
+                case '{': case '}': case '(':  case ')': case '[':  case ']': case ',': case '.': case ':': case '?':
                 {
                     var punctuation_string = new StringBuilder();
                     punctuation_string.Append(c);
                     read_character();
-                    token = new Punctuation(punctuation_string.ToString());
-                    break;
-                }
-
-                case '{': case '(': case '[': case ',':
-                {
-                    var punctuation_string = new StringBuilder();
-                    punctuation_string.Append(c);
-                    read_character();
-                    skip_whitespace(true);
                     token = new Punctuation(punctuation_string.ToString());
                     break;
                 }
@@ -147,22 +128,6 @@ namespace Fondue.Caquelon
 
         public void empty() {
             token = new EmptyToken();
-        }
-
-        Token scan_line_feed()
-        {
-            while (true)
-            {
-                read_character();
-                skip_whitespace(false);
-                if (character == null)
-                    return new InvalidToken();
-
-                if (character == '\n')
-                    continue;
-
-                return new LineFeed();
-            }
         }
 
         Token scan_identifier()
@@ -259,7 +224,7 @@ namespace Fondue.Caquelon
                 var c = (char)character;
                 switch (c)
                 {
-                    case '\"':
+                    case '\'':
                         read_character();
                         return new StringLiteral(value.ToString());
 
@@ -317,7 +282,7 @@ namespace Fondue.Caquelon
                 var c = (char)character;
                 switch (c)
                 {
-                    case '\'':
+                    case '\"':
                         read_character();
                         return new Identifier(value.ToString());
                     default:
@@ -529,7 +494,7 @@ namespace Fondue.Caquelon
             }
         }
 
-        void skip_whitespace(bool line_feed)
+        void skip_whitespace()
         {
             while (true)
             {
@@ -538,29 +503,16 @@ namespace Fondue.Caquelon
 
                 var c = (char)character;
 
-                switch(c)
+                switch (c)
                 {
                     case ' ':
-                        read_character();
-                        continue;
                     case '\t':
-                        read_character();
-                        continue;
                     case '\r':
+                    case '\n':
                         read_character();
                         continue;
-                    case '\n':
-                        if (line_feed)
-                        {
-                            read_character();
-                            continue;
-                        }
-                        else
-                        {
-                            return;
-                        }
 
-                    case ';':
+                    case '/':
                         read_character();
                         if (character == null)
                             return;
@@ -568,15 +520,18 @@ namespace Fondue.Caquelon
                         var c2 = (char)character;
                         switch (c2)
                         {
+                            case '/':
+                                read_character();
+                                handle_single_line_comment();
+                                break;
+
                             case '*':
                                 read_character();
                                 handle_multi_line_comment();
                                 break;
 
                             default:
-                                read_character();
-                                handle_single_line_comment();
-                                break;
+                                return;
                         }
                         break;
                     default:
@@ -626,23 +581,13 @@ namespace Fondue.Caquelon
 
                 switch (c)
                 {
-                    case ';':
-                        read_character();
-                        if (character == null)
-                            return;
-                        if (character == '*')
-                            handle_multi_line_comment();
-                        else
-                            continue;
-                        break;
-
                     case '*':
                         read_character();
                         if (character == null)
                             return;
 
                         c = (char)character;
-                        if (c == ';')
+                        if (c == '/')
                         {
                             read_character();
                             return;
@@ -760,22 +705,6 @@ namespace Fondue.Caquelon
 
                 default:
                     return null;
-            }
-        }
-
-        public bool parse_colon()
-        {
-            if (token is EmptyToken)
-                advance();
-
-            switch (token)
-            {
-                case Colon: case LineFeed:
-                    empty();
-                    return true;
-
-                default:
-                    return false;
             }
         }
 
@@ -900,10 +829,6 @@ namespace Fondue.Caquelon
     }
 
     public class LineFeed : Token
-    {
-    }
-
-    public class Colon : Token
     {
     }
 

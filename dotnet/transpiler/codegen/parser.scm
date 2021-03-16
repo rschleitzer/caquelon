@@ -92,7 +92,7 @@
 "
             "
                             (case (type content)
-                                (("keyword" "punctuation" "colon" "semicolon") (if (optional? content) "" ($ "var success_"(if (property content) (property content) ($ (case (type content) (("colon" "semicolon") (type content)) (else (link content)))"_"(number->string (child-number content))))" = ")))
+                                (("keyword" "punctuation" "semicolon") (if (optional? content) "" ($ "var success_"(if (property content) (property content) ($ (case (type content) (("semicolon") (type content)) (else (link content)))"_"(number->string (child-number content))))" = ")))
                                 (else ($ "var "(property content)" = "))
                             )
             "lexer.parse_"(type content)"("
@@ -100,7 +100,7 @@
                                 (("keyword")     ($ "\""(link content)"\""))
                                 (("punctuation") ($ "\""(value (element-with-id (link content)))"\""))
                                 (("identifier") ($ "keywords"))
-                                (("attribute" "literal" "colon" "semicolon") "")
+                                (("attribute" "literal" "semicolon") "")
                             )");
 "
                             (let
@@ -120,8 +120,8 @@
                                     )
                                 ))
                                 (case (type content)
-                                    (("keyword" "punctuation" "colon" "semicolon") (if (optional? content) "" ($ 
-"            if (!success_"(if (property content) (property content) ($ (case (type content) (("colon" "semicolon") (type content)) (else (link content)))"_"(number->string (child-number content))))")
+                                    (("keyword" "punctuation" "semicolon") (if (optional? content) "" ($ 
+"            if (!success_"(if (property content) (property content) ($ (case (type content) (("semicolon") (type content)) (else (link content)))"_"(number->string (child-number content))))")
 "                                       null-handler
                                     )))
                                     (("identifier") ($ 
@@ -151,7 +151,7 @@
 
                 (if (top? syntax) ""
 "
-            var end = lexer.get_position();
+            var stop = lexer.get_position();
 "               )
 "
             var ret = new "(id syntax)"Syntax
@@ -162,7 +162,7 @@
                 (if (top? syntax) ""
                                     ",
                     start = start,
-                    end = end
+                    end = stop
 "
                 )
 "                }"

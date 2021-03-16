@@ -44,12 +44,13 @@ namespace Fondue.Caquelon
             var library = parse_library();
             var usings = parse_using_list();
             var includes = parse_include_list();
-            var definitions = parse_definition_list();
-            if (definitions != null)
+            var declarations = parse_declaration_list();
+            var statements = parse_statement_list();
+            if (statements != null)
             {
                 if (!is_at_end())
                 {
-                    throw new ParserException("Unable to parse definition list.", new Span { file = file_name, start = new Position { line = lexer.previous_line, column = lexer.previous_column }, end = new Position { line = lexer.line, column = lexer.column } } );
+                    throw new ParserException("Unable to parse statement list.", new Span { file = file_name, start = new Position { line = lexer.previous_line, column = lexer.previous_column }, end = new Position { line = lexer.line, column = lexer.column } } );
                 }
             }
 
@@ -61,7 +62,8 @@ namespace Fondue.Caquelon
                 library = library,
                 usings = usings,
                 includes = includes,
-                definitions = definitions,
+                declarations = declarations,
+                statements = statements,
             };
 
             return ret;
@@ -79,7 +81,7 @@ namespace Fondue.Caquelon
                 throw new ParserException("Unable to parse name.", new Span { file = file_name, start = new Position { line = lexer.previous_line, column = lexer.previous_column }, end = new Position { line = lexer.line, column = lexer.column } } );
             var version = parse_version();
 
-            var end = lexer.get_position();
+            var stop = lexer.get_position();
 
             var ret = new LibrarySyntax
             {
@@ -87,7 +89,7 @@ namespace Fondue.Caquelon
                 {
                     file = file_name,
                     start = start,
-                    end = end
+                    end = stop
                 },
                 name = name,
                 version = version,
@@ -114,7 +116,7 @@ namespace Fondue.Caquelon
             }
             var extensions = parse_extension_list();
 
-            var end = lexer.get_position();
+            var stop = lexer.get_position();
 
             var ret = new NameSyntax
             {
@@ -122,7 +124,7 @@ namespace Fondue.Caquelon
                 {
                     file = file_name,
                     start = start,
-                    end = end
+                    end = stop
                 },
                 name = name,
                 extensions = extensions,
@@ -173,7 +175,7 @@ namespace Fondue.Caquelon
                     throw new ParserException("Unable to parse.", new Span { file = file_name, start = start, end = new Position { line = lexer.previous_line, column = lexer.previous_column } } );
             }
 
-            var end = lexer.get_position();
+            var stop = lexer.get_position();
 
             var ret = new ExtensionSyntax
             {
@@ -181,7 +183,7 @@ namespace Fondue.Caquelon
                 {
                     file = file_name,
                     start = start,
-                    end = end
+                    end = stop
                 },
                 name = name,
             };
@@ -203,7 +205,7 @@ namespace Fondue.Caquelon
                     throw new ParserException("Unable to parse.", new Span { file = file_name, start = start, end = new Position { line = lexer.previous_line, column = lexer.previous_column } } );
             }
 
-            var end = lexer.get_position();
+            var stop = lexer.get_position();
 
             var ret = new VersionSyntax
             {
@@ -211,7 +213,7 @@ namespace Fondue.Caquelon
                 {
                     file = file_name,
                     start = start,
-                    end = end
+                    end = stop
                 },
                 name = name,
             };
@@ -262,7 +264,7 @@ namespace Fondue.Caquelon
             }
             var version = parse_version();
 
-            var end = lexer.get_position();
+            var stop = lexer.get_position();
 
             var ret = new UsingSyntax
             {
@@ -270,7 +272,7 @@ namespace Fondue.Caquelon
                 {
                     file = file_name,
                     start = start,
-                    end = end
+                    end = stop
                 },
                 model = model,
                 version = version,
@@ -313,7 +315,7 @@ namespace Fondue.Caquelon
             var version = parse_version();
             var called = parse_called();
 
-            var end = lexer.get_position();
+            var stop = lexer.get_position();
 
             var ret = new IncludeSyntax
             {
@@ -321,7 +323,7 @@ namespace Fondue.Caquelon
                 {
                     file = file_name,
                     start = start,
-                    end = end
+                    end = stop
                 },
                 name = name,
                 version = version,
@@ -339,13 +341,20 @@ namespace Fondue.Caquelon
             if (!success_called_1)
                     return null;
 
-            var name = lexer.parse_literal();
-            if (name == null)
+            var name = lexer.parse_identifier(keywords);
+            if (name != null)
+            {
+                if (!is_identifier(name))
+                {
+                    throw new ParserException("Unable to parse.", new Span { file = file_name, start = start, end = new Position { line = lexer.previous_line, column = lexer.previous_column } } );
+                }
+            }
+            else
             {
                     throw new ParserException("Unable to parse.", new Span { file = file_name, start = start, end = new Position { line = lexer.previous_line, column = lexer.previous_column } } );
             }
 
-            var end = lexer.get_position();
+            var stop = lexer.get_position();
 
             var ret = new CalledSyntax
             {
@@ -353,7 +362,7 @@ namespace Fondue.Caquelon
                 {
                     file = file_name,
                     start = start,
-                    end = end
+                    end = stop
                 },
                 name = name,
             };
@@ -385,16 +394,6 @@ namespace Fondue.Caquelon
         public object parse_declaration()
         {
             {
-                var node = parse_publicdeclaration();
-                if (node != null)
-                    return node;
-            }
-            {
-                var node = parse_privatedeclaration();
-                if (node != null)
-                    return node;
-            }
-            {
                 var node = parse_codesystem();
                 if (node != null)
                     return node;
@@ -419,6 +418,16 @@ namespace Fondue.Caquelon
                 if (node != null)
                     return node;
             }
+            {
+                var node = parse_publicdeclaration();
+                if (node != null)
+                    return node;
+            }
+            {
+                var node = parse_privatedeclaration();
+                if (node != null)
+                    return node;
+            }
 
             return null;
         }
@@ -434,7 +443,7 @@ namespace Fondue.Caquelon
             if (declaration == null)
                 throw new ParserException("Unable to parse declaration.", new Span { file = file_name, start = new Position { line = lexer.previous_line, column = lexer.previous_column }, end = new Position { line = lexer.line, column = lexer.column } } );
 
-            var end = lexer.get_position();
+            var stop = lexer.get_position();
 
             var ret = new PrivateDeclarationSyntax
             {
@@ -442,7 +451,7 @@ namespace Fondue.Caquelon
                 {
                     file = file_name,
                     start = start,
-                    end = end
+                    end = stop
                 },
                 declaration = declaration,
             };
@@ -454,14 +463,14 @@ namespace Fondue.Caquelon
         {
             var start = lexer.get_previous_position();
 
-            var success_private_1 = lexer.parse_keyword("private");
-            if (!success_private_1)
+            var success_public_1 = lexer.parse_keyword("public");
+            if (!success_public_1)
                     return null;
             var export = parse_declaration();
             if (export == null)
                 throw new ParserException("Unable to parse declaration.", new Span { file = file_name, start = new Position { line = lexer.previous_line, column = lexer.previous_column }, end = new Position { line = lexer.line, column = lexer.column } } );
 
-            var end = lexer.get_position();
+            var stop = lexer.get_position();
 
             var ret = new PublicDeclarationSyntax
             {
@@ -469,7 +478,7 @@ namespace Fondue.Caquelon
                 {
                     file = file_name,
                     start = start,
-                    end = end
+                    end = stop
                 },
                 export = export,
             };
@@ -509,7 +518,7 @@ namespace Fondue.Caquelon
             }
             var version = parse_version();
 
-            var end = lexer.get_position();
+            var stop = lexer.get_position();
 
             var ret = new CodeSystemSyntax
             {
@@ -517,7 +526,7 @@ namespace Fondue.Caquelon
                 {
                     file = file_name,
                     start = start,
-                    end = end
+                    end = stop
                 },
                 name = name,
                 id = id,
@@ -560,7 +569,7 @@ namespace Fondue.Caquelon
             var version = parse_version();
             var codeSystems = parse_codesystem();
 
-            var end = lexer.get_position();
+            var stop = lexer.get_position();
 
             var ret = new ValueSetSyntax
             {
@@ -568,7 +577,7 @@ namespace Fondue.Caquelon
                 {
                     file = file_name,
                     start = start,
-                    end = end
+                    end = stop
                 },
                 name = name,
                 id = id,
@@ -598,7 +607,7 @@ namespace Fondue.Caquelon
             if (!success_right_curly_4)
                     throw new ParserException("Unable to parse.", new Span { file = file_name, start = start, end = new Position { line = lexer.previous_line, column = lexer.previous_column } } );
 
-            var end = lexer.get_position();
+            var stop = lexer.get_position();
 
             var ret = new CodeSystemsSyntax
             {
@@ -606,7 +615,7 @@ namespace Fondue.Caquelon
                 {
                     file = file_name,
                     start = start,
-                    end = end
+                    end = stop
                 },
                 identifiers = identifiers,
             };
@@ -655,7 +664,7 @@ namespace Fondue.Caquelon
 
             lexer.parse_punctuation(",");
 
-            var end = lexer.get_position();
+            var stop = lexer.get_position();
 
             var ret = new CodeIdentifierSyntax
             {
@@ -663,7 +672,7 @@ namespace Fondue.Caquelon
                 {
                     file = file_name,
                     start = start,
-                    end = end
+                    end = stop
                 },
                 identifier = identifier,
                 extension = extension,
@@ -711,7 +720,7 @@ namespace Fondue.Caquelon
                 throw new ParserException("Unable to parse codeidentifier.", new Span { file = file_name, start = new Position { line = lexer.previous_line, column = lexer.previous_column }, end = new Position { line = lexer.line, column = lexer.column } } );
             var display = parse_display();
 
-            var end = lexer.get_position();
+            var stop = lexer.get_position();
 
             var ret = new CodeSyntax
             {
@@ -719,7 +728,7 @@ namespace Fondue.Caquelon
                 {
                     file = file_name,
                     start = start,
-                    end = end
+                    end = stop
                 },
                 name = name,
                 id = id,
@@ -744,7 +753,7 @@ namespace Fondue.Caquelon
                     throw new ParserException("Unable to parse.", new Span { file = file_name, start = start, end = new Position { line = lexer.previous_line, column = lexer.previous_column } } );
             }
 
-            var end = lexer.get_position();
+            var stop = lexer.get_position();
 
             var ret = new DisplaySyntax
             {
@@ -752,7 +761,7 @@ namespace Fondue.Caquelon
                 {
                     file = file_name,
                     start = start,
-                    end = end
+                    end = stop
                 },
                 id = id,
             };
@@ -797,7 +806,7 @@ namespace Fondue.Caquelon
                     throw new ParserException("Unable to parse.", new Span { file = file_name, start = start, end = new Position { line = lexer.previous_line, column = lexer.previous_column } } );
             var display = parse_display();
 
-            var end = lexer.get_position();
+            var stop = lexer.get_position();
 
             var ret = new ConceptSyntax
             {
@@ -805,7 +814,7 @@ namespace Fondue.Caquelon
                 {
                     file = file_name,
                     start = start,
-                    end = end
+                    end = stop
                 },
                 name = name,
                 identifiers = identifiers,
@@ -838,7 +847,7 @@ namespace Fondue.Caquelon
             var type = parse_typespec();
             var defaultValue = parse_default();
 
-            var end = lexer.get_position();
+            var stop = lexer.get_position();
 
             var ret = new ParameterSyntax
             {
@@ -846,7 +855,7 @@ namespace Fondue.Caquelon
                 {
                     file = file_name,
                     start = start,
-                    end = end
+                    end = stop
                 },
                 name = name,
                 type = type,
@@ -905,7 +914,7 @@ namespace Fondue.Caquelon
                 throw new ParserException("Unable to parse name.", new Span { file = file_name, start = new Position { line = lexer.previous_line, column = lexer.previous_column }, end = new Position { line = lexer.line, column = lexer.column } } );
             var generics = parse_genericarguments();
 
-            var end = lexer.get_position();
+            var stop = lexer.get_position();
 
             var ret = new TypeSyntax
             {
@@ -913,7 +922,7 @@ namespace Fondue.Caquelon
                 {
                     file = file_name,
                     start = start,
-                    end = end
+                    end = stop
                 },
                 name = name,
                 generics = generics,
@@ -935,7 +944,7 @@ namespace Fondue.Caquelon
             if (!success_right_angular_3)
                     throw new ParserException("Unable to parse.", new Span { file = file_name, start = start, end = new Position { line = lexer.previous_line, column = lexer.previous_column } } );
 
-            var end = lexer.get_position();
+            var stop = lexer.get_position();
 
             var ret = new GenericArgumentsSyntax
             {
@@ -943,7 +952,7 @@ namespace Fondue.Caquelon
                 {
                     file = file_name,
                     start = start,
-                    end = end
+                    end = stop
                 },
                 generics = generics,
             };
@@ -981,7 +990,7 @@ namespace Fondue.Caquelon
 
             lexer.parse_punctuation(",");
 
-            var end = lexer.get_position();
+            var stop = lexer.get_position();
 
             var ret = new GenericArgumentSyntax
             {
@@ -989,7 +998,7 @@ namespace Fondue.Caquelon
                 {
                     file = file_name,
                     start = start,
-                    end = end
+                    end = stop
                 },
                 spec = spec,
             };
@@ -1010,7 +1019,7 @@ namespace Fondue.Caquelon
             if (!success_right_curly_3)
                     throw new ParserException("Unable to parse.", new Span { file = file_name, start = start, end = new Position { line = lexer.previous_line, column = lexer.previous_column } } );
 
-            var end = lexer.get_position();
+            var stop = lexer.get_position();
 
             var ret = new TupleSyntax
             {
@@ -1018,7 +1027,7 @@ namespace Fondue.Caquelon
                 {
                     file = file_name,
                     start = start,
-                    end = end
+                    end = stop
                 },
                 members = members,
             };
@@ -1069,7 +1078,7 @@ namespace Fondue.Caquelon
 
             lexer.parse_punctuation(",");
 
-            var end = lexer.get_position();
+            var stop = lexer.get_position();
 
             var ret = new ElementSyntax
             {
@@ -1077,7 +1086,7 @@ namespace Fondue.Caquelon
                 {
                     file = file_name,
                     start = start,
-                    end = end
+                    end = stop
                 },
                 name = name,
                 typeSpec = typeSpec,
@@ -1093,9 +1102,9 @@ namespace Fondue.Caquelon
             var success_default_1 = lexer.parse_keyword("default");
             if (!success_default_1)
                     return null;
-            var members = parse_expression();
+            var operation = parse_operation();
 
-            var end = lexer.get_position();
+            var stop = lexer.get_position();
 
             var ret = new DefaultSyntax
             {
@@ -1103,9 +1112,9 @@ namespace Fondue.Caquelon
                 {
                     file = file_name,
                     start = start,
-                    end = end
+                    end = stop
                 },
-                members = members,
+                operation = operation,
             };
 
             return ret;
@@ -1135,12 +1144,12 @@ namespace Fondue.Caquelon
         public object parse_statement()
         {
             {
-                var node = parse_context();
+                var node = parse_define();
                 if (node != null)
                     return node;
             }
             {
-                var node = parse_define();
+                var node = parse_context();
                 if (node != null)
                     return node;
             }
@@ -1164,7 +1173,7 @@ namespace Fondue.Caquelon
             if (name == null)
                 throw new ParserException("Unable to parse name.", new Span { file = file_name, start = new Position { line = lexer.previous_line, column = lexer.previous_column }, end = new Position { line = lexer.line, column = lexer.column } } );
 
-            var end = lexer.get_position();
+            var stop = lexer.get_position();
 
             var ret = new ContextSyntax
             {
@@ -1172,7 +1181,7 @@ namespace Fondue.Caquelon
                 {
                     file = file_name,
                     start = start,
-                    end = end
+                    end = stop
                 },
                 name = name,
             };
@@ -1192,7 +1201,7 @@ namespace Fondue.Caquelon
             if (definition == null)
                 throw new ParserException("Unable to parse definition.", new Span { file = file_name, start = new Position { line = lexer.previous_line, column = lexer.previous_column }, end = new Position { line = lexer.line, column = lexer.column } } );
 
-            var end = lexer.get_position();
+            var stop = lexer.get_position();
 
             var ret = new DefineSyntax
             {
@@ -1200,7 +1209,7 @@ namespace Fondue.Caquelon
                 {
                     file = file_name,
                     start = start,
-                    end = end
+                    end = stop
                 },
                 accessModifier = accessModifier,
                 definition = definition,
@@ -1233,7 +1242,7 @@ namespace Fondue.Caquelon
             if (!success_private_1)
                     return null;
 
-            var end = lexer.get_position();
+            var stop = lexer.get_position();
 
             var ret = new PrivateSyntax
             {
@@ -1241,7 +1250,7 @@ namespace Fondue.Caquelon
                 {
                     file = file_name,
                     start = start,
-                    end = end
+                    end = stop
                 },
             };
 
@@ -1256,7 +1265,7 @@ namespace Fondue.Caquelon
             if (!success_public_1)
                     return null;
 
-            var end = lexer.get_position();
+            var stop = lexer.get_position();
 
             var ret = new PublicSyntax
             {
@@ -1264,7 +1273,7 @@ namespace Fondue.Caquelon
                 {
                     file = file_name,
                     start = start,
-                    end = end
+                    end = stop
                 },
             };
 
@@ -1332,7 +1341,7 @@ namespace Fondue.Caquelon
             if (operation == null)
                 throw new ParserException("Unable to parse operation.", new Span { file = file_name, start = new Position { line = lexer.previous_line, column = lexer.previous_column }, end = new Position { line = lexer.line, column = lexer.column } } );
 
-            var end = lexer.get_position();
+            var stop = lexer.get_position();
 
             var ret = new ItemSyntax
             {
@@ -1340,7 +1349,7 @@ namespace Fondue.Caquelon
                 {
                     file = file_name,
                     start = start,
-                    end = end
+                    end = stop
                 },
                 name = name,
                 operation = operation,
@@ -1383,7 +1392,7 @@ namespace Fondue.Caquelon
             if (implementation == null)
                 throw new ParserException("Unable to parse implementation.", new Span { file = file_name, start = new Position { line = lexer.previous_line, column = lexer.previous_column }, end = new Position { line = lexer.line, column = lexer.column } } );
 
-            var end = lexer.get_position();
+            var stop = lexer.get_position();
 
             var ret = new FunctionSyntax
             {
@@ -1391,7 +1400,7 @@ namespace Fondue.Caquelon
                 {
                     file = file_name,
                     start = start,
-                    end = end
+                    end = stop
                 },
                 name = name,
                 operands = operands,
@@ -1413,7 +1422,7 @@ namespace Fondue.Caquelon
             if (type == null)
                 throw new ParserException("Unable to parse typespec.", new Span { file = file_name, start = new Position { line = lexer.previous_line, column = lexer.previous_column }, end = new Position { line = lexer.line, column = lexer.column } } );
 
-            var end = lexer.get_position();
+            var stop = lexer.get_position();
 
             var ret = new ReturnsSyntax
             {
@@ -1421,7 +1430,7 @@ namespace Fondue.Caquelon
                 {
                     file = file_name,
                     start = start,
-                    end = end
+                    end = stop
                 },
                 type = type,
             };
@@ -1453,7 +1462,7 @@ namespace Fondue.Caquelon
             if (!success_external_1)
                     return null;
 
-            var end = lexer.get_position();
+            var stop = lexer.get_position();
 
             var ret = new ExternalSyntax
             {
@@ -1461,7 +1470,7 @@ namespace Fondue.Caquelon
                 {
                     file = file_name,
                     start = start,
-                    end = end
+                    end = stop
                 },
             };
 
@@ -1475,9 +1484,7 @@ namespace Fondue.Caquelon
             if (operands == null)
                 return null;
 
-            lexer.parse_colon();
-
-            var end = lexer.get_position();
+            var stop = lexer.get_position();
 
             var ret = new OperationSyntax
             {
@@ -1485,7 +1492,7 @@ namespace Fondue.Caquelon
                 {
                     file = file_name,
                     start = start,
-                    end = end
+                    end = stop
                 },
                 operands = operands,
             };
@@ -1522,7 +1529,7 @@ namespace Fondue.Caquelon
                 return null;
             var postfixes = parse_memberaccess_list();
 
-            var end = lexer.get_position();
+            var stop = lexer.get_position();
 
             var ret = new OperandSyntax
             {
@@ -1530,7 +1537,7 @@ namespace Fondue.Caquelon
                 {
                     file = file_name,
                     start = start,
-                    end = end
+                    end = stop
                 },
                 expression = expression,
                 postfixes = postfixes,
@@ -1571,7 +1578,7 @@ namespace Fondue.Caquelon
             if (member == null)
                 throw new ParserException("Unable to parse name.", new Span { file = file_name, start = new Position { line = lexer.previous_line, column = lexer.previous_column }, end = new Position { line = lexer.line, column = lexer.column } } );
 
-            var end = lexer.get_position();
+            var stop = lexer.get_position();
 
             var ret = new MemberAccessSyntax
             {
@@ -1579,7 +1586,7 @@ namespace Fondue.Caquelon
                 {
                     file = file_name,
                     start = start,
-                    end = end
+                    end = stop
                 },
                 member = member,
             };
@@ -1590,12 +1597,22 @@ namespace Fondue.Caquelon
         public object parse_expression()
         {
             {
+                var node = parse_name();
+                if (node != null)
+                    return node;
+            }
+            {
                 var node = parse_literal();
                 if (node != null)
                     return node;
             }
             {
-                var node = parse_name();
+                var node = parse_openinterval();
+                if (node != null)
+                    return node;
+            }
+            {
+                var node = parse_closedinterval();
                 if (node != null)
                     return node;
             }
@@ -1613,7 +1630,7 @@ namespace Fondue.Caquelon
                     return null;
             }
 
-            var end = lexer.get_position();
+            var stop = lexer.get_position();
 
             var ret = new LiteralSyntax
             {
@@ -1621,9 +1638,175 @@ namespace Fondue.Caquelon
                 {
                     file = file_name,
                     start = start,
-                    end = end
+                    end = stop
                 },
                 literal = literal,
+            };
+
+            return ret;
+        }
+
+        public OpenIntervalSyntax parse_openinterval()
+        {
+            var start = lexer.get_previous_position();
+
+            var success_left_paren_1 = lexer.parse_punctuation("(");
+            if (!success_left_paren_1)
+                    return null;
+            var components = parse_component_list();
+            var end = parse_end();
+            if (end == null)
+                throw new ParserException("Unable to parse end.", new Span { file = file_name, start = new Position { line = lexer.previous_line, column = lexer.previous_column }, end = new Position { line = lexer.line, column = lexer.column } } );
+
+            var stop = lexer.get_position();
+
+            var ret = new OpenIntervalSyntax
+            {
+                span = new Span
+                {
+                    file = file_name,
+                    start = start,
+                    end = stop
+                },
+                components = components,
+                end = end,
+            };
+
+            return ret;
+        }
+
+        public ComponentSyntax[] parse_component_list()
+        {
+            List<ComponentSyntax> list = null;
+            while (true)
+            {
+                var node = parse_component();
+                if (node == null)
+                    break;
+
+                if (list == null)
+                    list = new List<ComponentSyntax>();
+
+                list.Add(node);
+            }
+
+            if (list != null)
+                return list.ToArray();
+            else
+                return null;
+        }
+
+        public ComponentSyntax parse_component()
+        {
+            var start = lexer.get_previous_position();
+            var operation = parse_operation();
+            if (operation == null)
+                return null;
+
+            lexer.parse_punctuation(",");
+
+            var stop = lexer.get_position();
+
+            var ret = new ComponentSyntax
+            {
+                span = new Span
+                {
+                    file = file_name,
+                    start = start,
+                    end = stop
+                },
+                operation = operation,
+            };
+
+            return ret;
+        }
+
+        public object parse_end()
+        {
+            {
+                var node = parse_openend();
+                if (node != null)
+                    return node;
+            }
+            {
+                var node = parse_closedend();
+                if (node != null)
+                    return node;
+            }
+
+            return null;
+        }
+
+        public OpenEndSyntax parse_openend()
+        {
+            var start = lexer.get_previous_position();
+
+            var success_right_paren_1 = lexer.parse_punctuation(")");
+            if (!success_right_paren_1)
+                    return null;
+
+            var stop = lexer.get_position();
+
+            var ret = new OpenEndSyntax
+            {
+                span = new Span
+                {
+                    file = file_name,
+                    start = start,
+                    end = stop
+                },
+            };
+
+            return ret;
+        }
+
+        public ClosedEndSyntax parse_closedend()
+        {
+            var start = lexer.get_previous_position();
+
+            var success_right_paren_1 = lexer.parse_punctuation(")");
+            if (!success_right_paren_1)
+                    return null;
+
+            var stop = lexer.get_position();
+
+            var ret = new ClosedEndSyntax
+            {
+                span = new Span
+                {
+                    file = file_name,
+                    start = start,
+                    end = stop
+                },
+            };
+
+            return ret;
+        }
+
+        public ClosedIntervalSyntax parse_closedinterval()
+        {
+            var start = lexer.get_previous_position();
+
+            var success_left_bracket_1 = lexer.parse_punctuation("[");
+            if (!success_left_bracket_1)
+                    return null;
+            var components = parse_component_list();
+            var end = parse_end();
+            if (end == null)
+                throw new ParserException("Unable to parse end.", new Span { file = file_name, start = new Position { line = lexer.previous_line, column = lexer.previous_column }, end = new Position { line = lexer.line, column = lexer.column } } );
+
+            var stop = lexer.get_position();
+
+            var ret = new ClosedIntervalSyntax
+            {
+                span = new Span
+                {
+                    file = file_name,
+                    start = start,
+                    end = stop
+                },
+                components = components,
+                end = end,
             };
 
             return ret;
@@ -1674,7 +1857,8 @@ namespace Fondue.Caquelon
         public LibrarySyntax library;
         public UsingSyntax[] usings;
         public IncludeSyntax[] includes;
-        public object[] definitions;
+        public object[] declarations;
+        public object[] statements;
     }
 
     public class LibrarySyntax
@@ -1721,7 +1905,7 @@ namespace Fondue.Caquelon
     public class CalledSyntax
     {
         public Span span;
-        public Literal name;
+        public string name;
     }
 
     public class PrivateDeclarationSyntax
@@ -1832,7 +2016,7 @@ namespace Fondue.Caquelon
     public class DefaultSyntax
     {
         public Span span;
-        public object members;
+        public OperationSyntax operation;
     }
 
     public class ContextSyntax
@@ -1908,5 +2092,35 @@ namespace Fondue.Caquelon
     {
         public Span span;
         public Literal literal;
+    }
+
+    public class OpenIntervalSyntax
+    {
+        public Span span;
+        public ComponentSyntax[] components;
+        public object end;
+    }
+
+    public class ComponentSyntax
+    {
+        public Span span;
+        public OperationSyntax operation;
+    }
+
+    public class OpenEndSyntax
+    {
+        public Span span;
+    }
+
+    public class ClosedEndSyntax
+    {
+        public Span span;
+    }
+
+    public class ClosedIntervalSyntax
+    {
+        public Span span;
+        public ComponentSyntax[] components;
+        public object end;
     }
 }

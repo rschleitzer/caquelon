@@ -9,7 +9,8 @@
         <content link = Library                        optional property = library
         <content link = Using                 multiple optional property = usings
         <content link = Include               multiple optional property = includes
-        <content link = Definition            multiple optional property = definitions
+        <content link = Declaration           multiple optional property = declarations
+        <content link = Statement             multiple optional property = statements
 
     <syntax id = Library
         <content link = library
@@ -41,23 +42,23 @@
 
     <syntax id = Called
         <content link = called
-        <content literal                                        property = name
+        <content identifier                                     property = name
 
     <syntax id = Declaration                  multiple abstract
-        <content link = PublicDeclaration
-        <content link = PrivateDeclaration
         <content link = CodeSystem
         <content link = ValueSet
         <content link = Code
         <content link = Concept
         <content link = Parameter
+        <content link = PublicDeclaration
+        <content link = PrivateDeclaration
 
     <syntax id = PrivateDeclaration
         <content link = private
         <content link = Declaration                             property = declaration
 
     <syntax id = PublicDeclaration
-        <content link = private
+        <content link = public
         <content link = Declaration                             property = export
 
     <syntax id = CodeSystem
@@ -144,11 +145,11 @@
 
     <syntax id = Default
         <content link = default
-        <content link = Expression                     optional property = members
+        <content link = Operation                      optional property = operation
 
     <syntax id = Statement                    multiple abstract
-        <content link = Context
         <content link = Define
+        <content link = Context
         <content link = Function
 
     <syntax id = Context
@@ -201,7 +202,6 @@
 
     <syntax id = Operation
         <content link = Operand               multiple          property = operands
-        <content colon                                 optional
 
     <syntax id = Operand                      multiple
         <content link = Expression                              property = expression
@@ -212,11 +212,37 @@
         <content link = Name                                    property = member
 
     <syntax id = Expression                            abstract
-        <content link = Literal
         <content link = Name
+        <content link = Literal
+        <content link = OpenInterval
+        <content link = ClosedInterval
 
     <syntax id = Literal
         <content literal                                        property = literal
+
+    <syntax id = OpenInterval
+        <content link = left_paren
+        <content link = Component             multiple optional property = components
+        <content link = End                                     property = end
+
+    <syntax id = Component                    multiple
+        <content link = Operation                               property = operation
+        <content link = comma                          optional
+
+    <syntax id = End                                   abstract
+        <content link = OpenEnd
+        <content link = ClosedEnd
+
+    <syntax id = OpenEnd
+        <content link = right_paren
+
+    <syntax id = ClosedEnd
+        <content link = right_paren
+
+    <syntax id = ClosedInterval
+        <content link = left_bracket
+        <content link = Component             multiple optional property = components
+        <content link = End                                     property = end
 
     <keyword id = called
     <keyword id = code
