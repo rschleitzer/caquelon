@@ -145,7 +145,7 @@
 
     <syntax id = Default
         <content link = default
-        <content link = Operation                      optional property = operation
+        <content link = Expression                     optional property = expression
 
     <syntax id = Statement                    multiple abstract
         <content link = Define
@@ -178,7 +178,7 @@
     <syntax id = Item
         <content identifier                                     property = name
         <content link = colon
-        <content link = Operation                               property = operation
+        <content link = Expression                              property = expression
 
     <syntax id = Function
         <content link = function
@@ -194,22 +194,11 @@
         <content link = TypeSpec                                property = type
 
     <syntax id = Implementation                        abstract
-        <content link = Operation
+        <content link = Expression
         <content link = External
 
     <syntax id = External
         <content link = external
-
-    <syntax id = Operation
-        <content link = Operand               multiple          property = operands
-
-    <syntax id = Operand                      multiple
-        <content link = Expression                              property = expression
-        <content link = MemberAccess          multiple optional property = postfixes
-
-    <syntax id = MemberAccess                 multiple
-        <content link = dot
-        <content link = Name                                    property = member
 
     <syntax id = Expression                            abstract
         <content link = Name
@@ -217,8 +206,23 @@
         <content link = OpenInterval
         <content link = ClosedInterval
 
-    <syntax id = Literal
+    <syntax id = Literal                               abstract
+        <content link = Primitive
+        <content link = Null
+        <content link = False
+        <content link = True
+
+    <syntax id= Primitive
         <content literal                                        property = literal
+
+    <syntax id= Null
+        <content link = null
+
+    <syntax id= False
+        <content link = false
+
+    <syntax id= True
+        <content link = true
 
     <syntax id = OpenInterval
         <content link = left_paren
@@ -226,7 +230,7 @@
         <content link = End                                     property = end
 
     <syntax id = Component                    multiple
-        <content link = Operation                               property = operation
+        <content link = Expression                              property = expression
         <content link = comma                          optional
 
     <syntax id = End                                   abstract
@@ -265,6 +269,9 @@
     <keyword id = using
     <keyword id = valueset
     <keyword id = version
+    <keyword id = null
+    <keyword id = false
+    <keyword id = true
 
     <punctuation id = dot               value = "."
     <punctuation id = colon             value = ":"

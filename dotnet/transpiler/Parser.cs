@@ -31,6 +31,9 @@ namespace Fondue.Caquelon
             "using",
             "valueset",
             "version",
+            "null",
+            "false",
+            "true",
         });
 
         public Parser(string deck)
@@ -1102,7 +1105,7 @@ namespace Fondue.Caquelon
             var success_default_1 = lexer.parse_keyword("default");
             if (!success_default_1)
                     return null;
-            var operation = parse_operation();
+            var expression = parse_expression();
 
             var stop = lexer.get_position();
 
@@ -1114,7 +1117,7 @@ namespace Fondue.Caquelon
                     start = start,
                     end = stop
                 },
-                operation = operation,
+                expression = expression,
             };
 
             return ret;
@@ -1337,9 +1340,9 @@ namespace Fondue.Caquelon
             var success_colon_2 = lexer.parse_punctuation(":");
             if (!success_colon_2)
                     throw new ParserException("Unable to parse.", new Span { file = file_name, start = start, end = new Position { line = lexer.previous_line, column = lexer.previous_column } } );
-            var operation = parse_operation();
-            if (operation == null)
-                throw new ParserException("Unable to parse operation.", new Span { file = file_name, start = new Position { line = lexer.previous_line, column = lexer.previous_column }, end = new Position { line = lexer.line, column = lexer.column } } );
+            var expression = parse_expression();
+            if (expression == null)
+                throw new ParserException("Unable to parse expression.", new Span { file = file_name, start = new Position { line = lexer.previous_line, column = lexer.previous_column }, end = new Position { line = lexer.line, column = lexer.column } } );
 
             var stop = lexer.get_position();
 
@@ -1352,7 +1355,7 @@ namespace Fondue.Caquelon
                     end = stop
                 },
                 name = name,
-                operation = operation,
+                expression = expression,
             };
 
             return ret;
@@ -1441,7 +1444,7 @@ namespace Fondue.Caquelon
         public object parse_implementation()
         {
             {
-                var node = parse_operation();
+                var node = parse_expression();
                 if (node != null)
                     return node;
             }
@@ -1477,123 +1480,6 @@ namespace Fondue.Caquelon
             return ret;
         }
 
-        public OperationSyntax parse_operation()
-        {
-            var start = lexer.get_previous_position();
-            var operands = parse_operand_list();
-            if (operands == null)
-                return null;
-
-            var stop = lexer.get_position();
-
-            var ret = new OperationSyntax
-            {
-                span = new Span
-                {
-                    file = file_name,
-                    start = start,
-                    end = stop
-                },
-                operands = operands,
-            };
-
-            return ret;
-        }
-
-        public OperandSyntax[] parse_operand_list()
-        {
-            List<OperandSyntax> list = null;
-            while (true)
-            {
-                var node = parse_operand();
-                if (node == null)
-                    break;
-
-                if (list == null)
-                    list = new List<OperandSyntax>();
-
-                list.Add(node);
-            }
-
-            if (list != null)
-                return list.ToArray();
-            else
-                return null;
-        }
-
-        public OperandSyntax parse_operand()
-        {
-            var start = lexer.get_previous_position();
-            var expression = parse_expression();
-            if (expression == null)
-                return null;
-            var postfixes = parse_memberaccess_list();
-
-            var stop = lexer.get_position();
-
-            var ret = new OperandSyntax
-            {
-                span = new Span
-                {
-                    file = file_name,
-                    start = start,
-                    end = stop
-                },
-                expression = expression,
-                postfixes = postfixes,
-            };
-
-            return ret;
-        }
-
-        public MemberAccessSyntax[] parse_memberaccess_list()
-        {
-            List<MemberAccessSyntax> list = null;
-            while (true)
-            {
-                var node = parse_memberaccess();
-                if (node == null)
-                    break;
-
-                if (list == null)
-                    list = new List<MemberAccessSyntax>();
-
-                list.Add(node);
-            }
-
-            if (list != null)
-                return list.ToArray();
-            else
-                return null;
-        }
-
-        public MemberAccessSyntax parse_memberaccess()
-        {
-            var start = lexer.get_previous_position();
-
-            var success_dot_1 = lexer.parse_punctuation(".");
-            if (!success_dot_1)
-                    return null;
-            var member = parse_name();
-            if (member == null)
-                throw new ParserException("Unable to parse name.", new Span { file = file_name, start = new Position { line = lexer.previous_line, column = lexer.previous_column }, end = new Position { line = lexer.line, column = lexer.column } } );
-
-            var stop = lexer.get_position();
-
-            var ret = new MemberAccessSyntax
-            {
-                span = new Span
-                {
-                    file = file_name,
-                    start = start,
-                    end = stop
-                },
-                member = member,
-            };
-
-            return ret;
-        }
-
         public object parse_expression()
         {
             {
@@ -1620,7 +1506,33 @@ namespace Fondue.Caquelon
             return null;
         }
 
-        public LiteralSyntax parse_literal()
+        public object parse_literal()
+        {
+            {
+                var node = parse_primitive();
+                if (node != null)
+                    return node;
+            }
+            {
+                var node = parse_null();
+                if (node != null)
+                    return node;
+            }
+            {
+                var node = parse_false();
+                if (node != null)
+                    return node;
+            }
+            {
+                var node = parse_true();
+                if (node != null)
+                    return node;
+            }
+
+            return null;
+        }
+
+        public PrimitiveSyntax parse_primitive()
         {
             var start = lexer.get_previous_position();
 
@@ -1632,7 +1544,7 @@ namespace Fondue.Caquelon
 
             var stop = lexer.get_position();
 
-            var ret = new LiteralSyntax
+            var ret = new PrimitiveSyntax
             {
                 span = new Span
                 {
@@ -1641,6 +1553,75 @@ namespace Fondue.Caquelon
                     end = stop
                 },
                 literal = literal,
+            };
+
+            return ret;
+        }
+
+        public NullSyntax parse_null()
+        {
+            var start = lexer.get_previous_position();
+
+            var success_null_1 = lexer.parse_keyword("null");
+            if (!success_null_1)
+                    return null;
+
+            var stop = lexer.get_position();
+
+            var ret = new NullSyntax
+            {
+                span = new Span
+                {
+                    file = file_name,
+                    start = start,
+                    end = stop
+                },
+            };
+
+            return ret;
+        }
+
+        public FalseSyntax parse_false()
+        {
+            var start = lexer.get_previous_position();
+
+            var success_false_1 = lexer.parse_keyword("false");
+            if (!success_false_1)
+                    return null;
+
+            var stop = lexer.get_position();
+
+            var ret = new FalseSyntax
+            {
+                span = new Span
+                {
+                    file = file_name,
+                    start = start,
+                    end = stop
+                },
+            };
+
+            return ret;
+        }
+
+        public TrueSyntax parse_true()
+        {
+            var start = lexer.get_previous_position();
+
+            var success_true_1 = lexer.parse_keyword("true");
+            if (!success_true_1)
+                    return null;
+
+            var stop = lexer.get_position();
+
+            var ret = new TrueSyntax
+            {
+                span = new Span
+                {
+                    file = file_name,
+                    start = start,
+                    end = stop
+                },
             };
 
             return ret;
@@ -1699,8 +1680,8 @@ namespace Fondue.Caquelon
         public ComponentSyntax parse_component()
         {
             var start = lexer.get_previous_position();
-            var operation = parse_operation();
-            if (operation == null)
+            var expression = parse_expression();
+            if (expression == null)
                 return null;
 
             lexer.parse_punctuation(",");
@@ -1715,7 +1696,7 @@ namespace Fondue.Caquelon
                     start = start,
                     end = stop
                 },
-                operation = operation,
+                expression = expression,
             };
 
             return ret;
@@ -2016,7 +1997,7 @@ namespace Fondue.Caquelon
     public class DefaultSyntax
     {
         public Span span;
-        public OperationSyntax operation;
+        public object expression;
     }
 
     public class ContextSyntax
@@ -2046,7 +2027,7 @@ namespace Fondue.Caquelon
     {
         public Span span;
         public string name;
-        public OperationSyntax operation;
+        public object expression;
     }
 
     public class FunctionSyntax
@@ -2069,29 +2050,25 @@ namespace Fondue.Caquelon
         public Span span;
     }
 
-    public class OperationSyntax
-    {
-        public Span span;
-        public OperandSyntax[] operands;
-    }
-
-    public class OperandSyntax
-    {
-        public Span span;
-        public object expression;
-        public MemberAccessSyntax[] postfixes;
-    }
-
-    public class MemberAccessSyntax
-    {
-        public Span span;
-        public NameSyntax member;
-    }
-
-    public class LiteralSyntax
+    public class PrimitiveSyntax
     {
         public Span span;
         public Literal literal;
+    }
+
+    public class NullSyntax
+    {
+        public Span span;
+    }
+
+    public class FalseSyntax
+    {
+        public Span span;
+    }
+
+    public class TrueSyntax
+    {
+        public Span span;
     }
 
     public class OpenIntervalSyntax
@@ -2104,7 +2081,7 @@ namespace Fondue.Caquelon
     public class ComponentSyntax
     {
         public Span span;
-        public OperationSyntax operation;
+        public object expression;
     }
 
     public class OpenEndSyntax
