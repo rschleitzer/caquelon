@@ -1,10 +1,12 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Fondue.Caquelon;
+using System.Linq;
+using System;
 
 namespace tests
 {
     [TestClass]
-    public class CaquelonTests
+    public class SimpleTests
     {
         //[TestMethod]
         //public void Boolean()
@@ -29,7 +31,7 @@ namespace tests
         [TestMethod]
         public void LogicalOperatorsTest()
         {
-            var fileSyntax = Transpiler.ParseFile("CqlLogicalOperatorsTest.cql");
+            Assert.AreEqual(Transpiler.ExecuteIntegerExpression("if (true and true) = (true) then 1 else 0", new string[] { }), 1, "TrueAndTrue");
         }
     }
 }

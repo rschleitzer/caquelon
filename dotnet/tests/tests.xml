@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE testsuite [
+
+  <!ELEMENT testsuite (tests+)>
+
+  <!ELEMENT tests (group+)>
+  <!ATTLIST tests
+    xmlns:xsi          CDATA     #REQUIRED
+    xmlns              CDATA     #REQUIRED
+    xsi:schemaLocation CDATA     #REQUIRED
+    name               CDATA     #REQUIRED
+    reference          CDATA     #REQUIRED
+  >
+
+  <!ELEMENT group (test*)>
+  <!ATTLIST group
+    name               CDATA     #IMPLIED
+  >
+
+  <!ELEMENT test (expression, output?)>
+  <!ATTLIST test
+    name               CDATA     #REQUIRED
+  >
+
+  <!ELEMENT expression (#PCDATA)>
+  <!ATTLIST expression
+    invalid (false|true) "true"
+  >
+
+  <!ELEMENT output       (#PCDATA)>
+
+  
+  <!ENTITY aggregatefunctions SYSTEM "Standard/CqlAggregateFunctionsTest.xml">
+  <!ENTITY arithmeticfunctions SYSTEM "Standard/CqlArithmeticFunctionsTest.xml">
+  <!ENTITY comparisonoperators SYSTEM "Standard/CqlComparisonOperatorsTest.xml">
+  <!ENTITY conditionaloperators SYSTEM "Standard/CqlConditionalOperatorsTest.xml">
+  <!ENTITY datetimeoperators SYSTEM "Standard/CqlDateTimeOperatorsTest.xml">
+  <!ENTITY errorsandmessagingoperators SYSTEM "Standard/CqlErrorsAndMessagingOperatorsTest.xml">
+  <!ENTITY intervaloperators SYSTEM "Standard/CqlIntervalOperatorsTest.xml">
+  <!ENTITY listoperators SYSTEM "Standard/CqlListOperatorsTest.xml">
+  <!ENTITY logicaloperators SYSTEM "Standard/CqlLogicalOperatorsTest.xml">
+  <!ENTITY nullologicaloperators SYSTEM "Standard/CqlNullologicalOperatorsTest.xml">
+  <!ENTITY stringoperators SYSTEM "Standard/CqlStringOperatorsTest.xml">
+  <!ENTITY typeoperators SYSTEM "Standard/CqlTypeOperatorsTest.xml">
+  <!ENTITY typestest SYSTEM "Standard/CqlTypesTest.xml">
+  <!ENTITY valuelisteralsandselectors SYSTEM "Standard/ValueLiteralsAndSelectors.xml">
+]>
+
+<testsuite>
+
+  &aggregatefunctions;
+  &arithmeticfunctions;
+  &comparisonoperators;
+  &conditionaloperators;
+  &datetimeoperators;
+  &errorsandmessagingoperators;
+  &intervaloperators;
+  &listoperators;
+  &logicaloperators;
+  &nullologicaloperators;
+  &stringoperators;
+  &typeoperators;
+  &typestest;
+  &valuelisteralsandselectors;
+
+</testsuite>

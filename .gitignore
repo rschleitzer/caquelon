@@ -2,4 +2,4 @@ obj/
 bin/
 .vs/
 ParserTest.cql
-CqlLogicalOperatorsTest.cql
+Standard/
