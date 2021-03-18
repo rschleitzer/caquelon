@@ -10,6 +10,7 @@ namespace Fondue.Caquelon
         Lexer lexer;
         string file_name = "";
         HashSet<string> keywords = new HashSet<string>(new string[] {
+            "and",
             "called",
             "code",
             "codesystem",
@@ -19,9 +20,11 @@ namespace Fondue.Caquelon
             "default",
             "define",
             "display",
+            "else",
             "external",
             "from",
             "function",
+            "if",
             "include",
             "library",
             "parameter",
@@ -33,6 +36,7 @@ namespace Fondue.Caquelon
             "version",
             "null",
             "false",
+            "then",
             "true",
             "Tuple",
         });
@@ -1557,6 +1561,16 @@ namespace Fondue.Caquelon
                 if (node != null)
                     return node;
             }
+            {
+                var node = parse_and();
+                if (node != null)
+                    return node;
+            }
+            {
+                var node = parse_if();
+                if (node != null)
+                    return node;
+            }
 
             return null;
         }
@@ -1970,6 +1984,76 @@ namespace Fondue.Caquelon
             return ret;
         }
 
+        public AndSyntax parse_and()
+        {
+            var start = lexer.get_previous_position();
+
+            var success_and_1 = lexer.parse_keyword("and");
+            if (!success_and_1)
+                    return null;
+            var operand = parse_expression();
+            if (operand == null)
+                throw new ParserException("Unable to parse expression.", new Span { file = file_name, start = new Position { line = lexer.previous_line, column = lexer.previous_column }, end = new Position { line = lexer.line, column = lexer.column } } );
+
+            var stop = lexer.get_position();
+
+            var ret = new AndSyntax
+            {
+                span = new Span
+                {
+                    file = file_name,
+                    start = start,
+                    end = stop
+                },
+                operand = operand,
+            };
+
+            return ret;
+        }
+
+        public IfSyntax parse_if()
+        {
+            var start = lexer.get_previous_position();
+
+            var success_if_1 = lexer.parse_keyword("if");
+            if (!success_if_1)
+                    return null;
+            var condition = parse_expression();
+            if (condition == null)
+                throw new ParserException("Unable to parse expression.", new Span { file = file_name, start = new Position { line = lexer.previous_line, column = lexer.previous_column }, end = new Position { line = lexer.line, column = lexer.column } } );
+
+            var success_then_3 = lexer.parse_keyword("then");
+            if (!success_then_3)
+                    throw new ParserException("Unable to parse.", new Span { file = file_name, start = start, end = new Position { line = lexer.previous_line, column = lexer.previous_column } } );
+            var consequent = parse_expression();
+            if (consequent == null)
+                throw new ParserException("Unable to parse expression.", new Span { file = file_name, start = new Position { line = lexer.previous_line, column = lexer.previous_column }, end = new Position { line = lexer.line, column = lexer.column } } );
+
+            var success_else_5 = lexer.parse_keyword("else");
+            if (!success_else_5)
+                    throw new ParserException("Unable to parse.", new Span { file = file_name, start = start, end = new Position { line = lexer.previous_line, column = lexer.previous_column } } );
+            var alternative = parse_expression();
+            if (alternative == null)
+                throw new ParserException("Unable to parse expression.", new Span { file = file_name, start = new Position { line = lexer.previous_line, column = lexer.previous_column }, end = new Position { line = lexer.line, column = lexer.column } } );
+
+            var stop = lexer.get_position();
+
+            var ret = new IfSyntax
+            {
+                span = new Span
+                {
+                    file = file_name,
+                    start = start,
+                    end = stop
+                },
+                condition = condition,
+                consequent = consequent,
+                alternative = alternative,
+            };
+
+            return ret;
+        }
+
         public bool is_at_end()
         {
             return lexer.is_at_end();
@@ -2301,5 +2385,19 @@ namespace Fondue.Caquelon
         public Span span;
         public string name;
         public ExpressionSyntax expression;
+    }
+
+    public class AndSyntax
+    {
+        public Span span;
+        public ExpressionSyntax operand;
+    }
+
+    public class IfSyntax
+    {
+        public Span span;
+        public ExpressionSyntax condition;
+        public ExpressionSyntax consequent;
+        public ExpressionSyntax alternative;
     }
 }

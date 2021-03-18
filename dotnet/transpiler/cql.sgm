@@ -210,6 +210,8 @@
         <content link = ClosedInterval
         <content link = TupleSelector
         <content link = TupleMembers
+        <content link = And
+        <content link = If
 
     <syntax id = Literal                               abstract
         <content link = Primitive
@@ -268,6 +270,19 @@
         <content link = Expression                              property = expression
         <content link = comma                          optional
 
+    <syntax id = And
+        <content link = and
+        <content link = Expression                              property = operand
+
+    <syntax id = If
+        <content link = if
+        <content link = Expression                              property = condition
+        <content link = then
+        <content link = Expression                              property = consequent
+        <content link = else
+        <content link = Expression                              property = alternative
+
+    <keyword id = and
     <keyword id = called
     <keyword id = code
     <keyword id = codesystem
@@ -277,9 +292,11 @@
     <keyword id = default
     <keyword id = define
     <keyword id = display
+    <keyword id = else
     <keyword id = external
     <keyword id = from
     <keyword id = function
+    <keyword id = if
     <keyword id = include
     <keyword id = library
     <keyword id = parameter
@@ -291,6 +308,7 @@
     <keyword id = version
     <keyword id = null
     <keyword id = false
+    <keyword id = then
     <keyword id = true
     <keyword id = Tuple
 

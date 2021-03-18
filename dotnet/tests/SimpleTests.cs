@@ -29,7 +29,7 @@ namespace tests
         }
 
         [TestMethod]
-        public void LogicalOperatorsTest()
+        public void AndTest()
         {
             Assert.AreEqual(Transpiler.ExecuteIntegerExpression("if (true and true) = (true) then 1 else 0", new string[] { }), 1, "TrueAndTrue");
         }
