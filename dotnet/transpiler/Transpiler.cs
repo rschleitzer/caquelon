@@ -54,8 +54,22 @@ namespace Fondue.Caquelon
                     operation.Operands.Add(new Operand { Expression = new Name { Path = "true", Span = trueSyntax.span } });
                     operation.Operands.Add(new Operand { Expression = new Name { Path = "as Integer", Span = trueSyntax.span } });
                     return operation;
+                case PrimitiveSyntax primitiveSyntax:
+                    operation.Operands.Add( BuildPrimitive(primitiveSyntax));
+                    return operation;
                 default:
                     throw new NotImplementedException($"The {expressionSyntax.GetType()} is not yet implemented.");
+            }
+        }
+
+        static Operand BuildPrimitive(PrimitiveSyntax primitiveSyntax)
+        {
+            switch (primitiveSyntax.literal)
+            {
+                case Integer integer:
+                    return new Operand { Expression = new IntegerConstant { Value = int.Parse(integer.value) } };
+                default:
+                    throw new NotImplementedException($"The {primitiveSyntax.GetType()} is not yet implemented.");
             }
         }
 

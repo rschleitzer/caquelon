@@ -7,11 +7,17 @@ namespace tests
     public class CaquelonTests
     {
         [TestMethod]
-        public void ExecuteExpression()
+        public void Boolean()
         {
             var empty = new string[] { };
             Assert.AreEqual(Transpiler.ExecuteIntegerExpression("false", empty), 0);
             Assert.AreEqual(Transpiler.ExecuteIntegerExpression("true", empty), 1);
+        }
+
+        [TestMethod]
+        public void Integer()
+        {
+            Assert.AreEqual(Transpiler.ExecuteIntegerExpression("42", new string[] { }), 42);
         }
 
         [TestMethod]
