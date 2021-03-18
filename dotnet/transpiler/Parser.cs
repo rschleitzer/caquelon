@@ -34,6 +34,7 @@ namespace Fondue.Caquelon
             "null",
             "false",
             "true",
+            "Tuple",
         });
 
         public Parser(string deck)
@@ -892,7 +893,7 @@ namespace Fondue.Caquelon
         public object parse_typespec()
         {
             {
-                var node = parse_tuple();
+                var node = parse_tuplespec();
                 if (node != null)
                     return node;
             }
@@ -1009,7 +1010,7 @@ namespace Fondue.Caquelon
             return ret;
         }
 
-        public TupleSyntax parse_tuple()
+        public TupleSpecSyntax parse_tuplespec()
         {
             var start = lexer.get_previous_position();
 
@@ -1024,7 +1025,7 @@ namespace Fondue.Caquelon
 
             var stop = lexer.get_position();
 
-            var ret = new TupleSyntax
+            var ret = new TupleSpecSyntax
             {
                 span = new Span
                 {
@@ -1480,7 +1481,51 @@ namespace Fondue.Caquelon
             return ret;
         }
 
-        public object parse_expression()
+        public ExpressionSyntax parse_expression()
+        {
+            var start = lexer.get_previous_position();
+            var operands = parse_operand_list();
+            if (operands == null)
+                return null;
+
+            var stop = lexer.get_position();
+
+            var ret = new ExpressionSyntax
+            {
+                span = new Span
+                {
+                    file = file_name,
+                    start = start,
+                    end = stop
+                },
+                operands = operands,
+            };
+
+            return ret;
+        }
+
+        public object[] parse_operand_list()
+        {
+            List<object> list = null;
+            while (true)
+            {
+                var node = parse_operand();
+                if (node == null)
+                    break;
+
+                if (list == null)
+                    list = new List<object>();
+
+                list.Add(node);
+            }
+
+            if (list != null)
+                return list.ToArray();
+            else
+                return null;
+        }
+
+        public object parse_operand()
         {
             {
                 var node = parse_name();
@@ -1499,6 +1544,16 @@ namespace Fondue.Caquelon
             }
             {
                 var node = parse_closedinterval();
+                if (node != null)
+                    return node;
+            }
+            {
+                var node = parse_tupleselector();
+                if (node != null)
+                    return node;
+            }
+            {
+                var node = parse_tuplemembers();
                 if (node != null)
                     return node;
             }
@@ -1793,6 +1848,128 @@ namespace Fondue.Caquelon
             return ret;
         }
 
+        public TupleSelectorSyntax parse_tupleselector()
+        {
+            var start = lexer.get_previous_position();
+
+            var success_Tuple_1 = lexer.parse_keyword("Tuple");
+            if (!success_Tuple_1)
+                    return null;
+            var members = parse_tuplemembers();
+            if (members == null)
+                throw new ParserException("Unable to parse tuplemembers.", new Span { file = file_name, start = new Position { line = lexer.previous_line, column = lexer.previous_column }, end = new Position { line = lexer.line, column = lexer.column } } );
+
+            var stop = lexer.get_position();
+
+            var ret = new TupleSelectorSyntax
+            {
+                span = new Span
+                {
+                    file = file_name,
+                    start = start,
+                    end = stop
+                },
+                members = members,
+            };
+
+            return ret;
+        }
+
+        public TupleMembersSyntax parse_tuplemembers()
+        {
+            var start = lexer.get_previous_position();
+
+            var success_left_curly_1 = lexer.parse_punctuation("{");
+            if (!success_left_curly_1)
+                    return null;
+            var members = parse_member_list();
+            if (members == null)
+                throw new ParserException("Unable to parse member list.", new Span { file = file_name, start = new Position { line = lexer.previous_line, column = lexer.previous_column }, end = new Position { line = lexer.line, column = lexer.column } } );
+
+            var success_right_curly_3 = lexer.parse_punctuation("}");
+            if (!success_right_curly_3)
+                    throw new ParserException("Unable to parse.", new Span { file = file_name, start = start, end = new Position { line = lexer.previous_line, column = lexer.previous_column } } );
+
+            var stop = lexer.get_position();
+
+            var ret = new TupleMembersSyntax
+            {
+                span = new Span
+                {
+                    file = file_name,
+                    start = start,
+                    end = stop
+                },
+                members = members,
+            };
+
+            return ret;
+        }
+
+        public MemberSyntax[] parse_member_list()
+        {
+            List<MemberSyntax> list = null;
+            while (true)
+            {
+                var node = parse_member();
+                if (node == null)
+                    break;
+
+                if (list == null)
+                    list = new List<MemberSyntax>();
+
+                list.Add(node);
+            }
+
+            if (list != null)
+                return list.ToArray();
+            else
+                return null;
+        }
+
+        public MemberSyntax parse_member()
+        {
+            var start = lexer.get_previous_position();
+
+            var name = lexer.parse_identifier(keywords);
+            if (name != null)
+            {
+                if (!is_identifier(name))
+                {
+                    return null;
+                }
+            }
+            else
+            {
+                    return null;
+            }
+
+            var success_colon_2 = lexer.parse_punctuation(":");
+            if (!success_colon_2)
+                    throw new ParserException("Unable to parse.", new Span { file = file_name, start = start, end = new Position { line = lexer.previous_line, column = lexer.previous_column } } );
+            var expression = parse_expression();
+            if (expression == null)
+                throw new ParserException("Unable to parse expression.", new Span { file = file_name, start = new Position { line = lexer.previous_line, column = lexer.previous_column }, end = new Position { line = lexer.line, column = lexer.column } } );
+
+            lexer.parse_punctuation(",");
+
+            var stop = lexer.get_position();
+
+            var ret = new MemberSyntax
+            {
+                span = new Span
+                {
+                    file = file_name,
+                    start = start,
+                    end = stop
+                },
+                name = name,
+                expression = expression,
+            };
+
+            return ret;
+        }
+
         public bool is_at_end()
         {
             return lexer.is_at_end();
@@ -1981,7 +2158,7 @@ namespace Fondue.Caquelon
         public TypeSyntax spec;
     }
 
-    public class TupleSyntax
+    public class TupleSpecSyntax
     {
         public Span span;
         public ElementSyntax[] members;
@@ -1997,7 +2174,7 @@ namespace Fondue.Caquelon
     public class DefaultSyntax
     {
         public Span span;
-        public object expression;
+        public ExpressionSyntax expression;
     }
 
     public class ContextSyntax
@@ -2027,7 +2204,7 @@ namespace Fondue.Caquelon
     {
         public Span span;
         public string name;
-        public object expression;
+        public ExpressionSyntax expression;
     }
 
     public class FunctionSyntax
@@ -2048,6 +2225,12 @@ namespace Fondue.Caquelon
     public class ExternalSyntax
     {
         public Span span;
+    }
+
+    public class ExpressionSyntax
+    {
+        public Span span;
+        public object[] operands;
     }
 
     public class PrimitiveSyntax
@@ -2081,7 +2264,7 @@ namespace Fondue.Caquelon
     public class ComponentSyntax
     {
         public Span span;
-        public object expression;
+        public ExpressionSyntax expression;
     }
 
     public class OpenEndSyntax
@@ -2099,5 +2282,24 @@ namespace Fondue.Caquelon
         public Span span;
         public ComponentSyntax[] components;
         public object end;
+    }
+
+    public class TupleSelectorSyntax
+    {
+        public Span span;
+        public TupleMembersSyntax members;
+    }
+
+    public class TupleMembersSyntax
+    {
+        public Span span;
+        public MemberSyntax[] members;
+    }
+
+    public class MemberSyntax
+    {
+        public Span span;
+        public string name;
+        public ExpressionSyntax expression;
     }
 }

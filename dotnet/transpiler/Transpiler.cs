@@ -12,19 +12,19 @@ namespace Fondue.Caquelon
     {
         public static FileSyntax BuildLibrary(string library)
         {
-            var fileSyntax = parseFile(library);
+            var fileSyntax = ParseFile(library);
             return fileSyntax;
         }
 
         public static int ExecuteIntegerExpression(string expression, string[] arguments)
         {
-            var expressionSyntax = parseExpression(expression);
+            var expressionSyntax = ParseOperands(expression);
             var source = BuildIntegerExpression(expressionSyntax);
             return Compiler.ExecuteModel(source, arguments);
         }
 
 
-        static Source BuildIntegerExpression(object expressionSyntax)
+        static Source BuildIntegerExpression(ExpressionSyntax expressionSyntax)
         {
             var source = new Source
             {
@@ -41,24 +41,23 @@ namespace Fondue.Caquelon
             return source;
         }
 
-        static Operation BuildOperation(object expressionSyntax)
+        static Operation BuildOperation(ExpressionSyntax expressionSyntax)
         {
-            var operation = new Operation { Operands = new List<Operand>() };
-            switch (expressionSyntax)
+            return new Operation { Operands = expressionSyntax.operands.ToList().ConvertAll(it => BuildOperand(it)) };
+        }
+
+        static Operand BuildOperand(object operandSyntax)
+        {
+            switch (operandSyntax)
             {
                 case FalseSyntax trueSyntax:
-                    operation.Operands.Add(new Operand { Expression = new Name { Path = "false", Span = trueSyntax.span } });
-                    operation.Operands.Add(new Operand { Expression = new Name { Path = "as Integer", Span = trueSyntax.span } });
-                    return operation;
+                    return new Operand { Expression = new Name { Path = "false", Span = trueSyntax.span } };
                 case TrueSyntax trueSyntax:
-                    operation.Operands.Add(new Operand { Expression = new Name { Path = "true", Span = trueSyntax.span } });
-                    operation.Operands.Add(new Operand { Expression = new Name { Path = "as Integer", Span = trueSyntax.span } });
-                    return operation;
+                    return new Operand { Expression = new Name { Path = "true", Span = trueSyntax.span } };
                 case PrimitiveSyntax primitiveSyntax:
-                    operation.Operands.Add( BuildPrimitive(primitiveSyntax));
-                    return operation;
+                    return BuildPrimitive(primitiveSyntax);
                 default:
-                    throw new NotImplementedException($"The {expressionSyntax.GetType()} is not yet implemented.");
+                    throw new NotImplementedException($"The {operandSyntax.GetType()} is not yet implemented.");
             }
         }
 
@@ -73,7 +72,7 @@ namespace Fondue.Caquelon
             }
         }
 
-        static object parseExpression(string text)
+        static ExpressionSyntax ParseOperands(string text)
         {
             var parser = new Parser(text);
             var expressionSyntax = parser.parse_expression();
@@ -90,7 +89,7 @@ namespace Fondue.Caquelon
             return expressionSyntax;
         }
 
-        static FileSyntax parseFile(string file)
+        public static FileSyntax ParseFile(string file)
         {
             var text = System.IO.File.ReadAllText(file);
             var parser = new Parser(text);

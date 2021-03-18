@@ -116,7 +116,7 @@
         <content link = Default                        optional property = defaultValue
 
     <syntax id = TypeSpec                     multiple abstract
-        <content link = Tuple
+        <content link = TupleSpec
         <content link = Type
 
     <syntax id = Type
@@ -133,7 +133,7 @@
         <content link = Type                                    property = spec
         <content link = comma                          optional
 
-    <syntax id = Tuple
+    <syntax id = TupleSpec
         <content link = left_curly
         <content link = Element               multiple optional property = members
         <content link = right_curly
@@ -199,12 +199,17 @@
 
     <syntax id = External
         <content link = external
+                 
+    <syntax id = Expression
+        <content link = Operand               multiple          property = operands
 
-    <syntax id = Expression                            abstract
+    <syntax id = Operand                      multiple abstract
         <content link = Name
         <content link = Literal
         <content link = OpenInterval
         <content link = ClosedInterval
+        <content link = TupleSelector
+        <content link = TupleMembers
 
     <syntax id = Literal                               abstract
         <content link = Primitive
@@ -248,6 +253,21 @@
         <content link = Component             multiple optional property = components
         <content link = End                                     property = end
 
+    <syntax id = TupleSelector
+        <content link = Tuple
+        <content link = TupleMembers                            property = members
+
+    <syntax id = TupleMembers
+        <content link = left_curly
+        <content link = Member                multiple          property = members
+        <content link = right_curly
+
+    <syntax id = Member                       multiple
+        <content identifier                                     property = name
+        <content link = colon
+        <content link = Expression                              property = expression
+        <content link = comma                          optional
+
     <keyword id = called
     <keyword id = code
     <keyword id = codesystem
@@ -272,6 +292,7 @@
     <keyword id = null
     <keyword id = false
     <keyword id = true
+    <keyword id = Tuple
 
     <punctuation id = dot               value = "."
     <punctuation id = colon             value = ":"
