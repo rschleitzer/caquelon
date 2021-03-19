@@ -19,12 +19,12 @@ namespace Fondue.Caquelon
         public static int ExecuteIntegerExpression(string expression, string[] arguments)
         {
             var expressionSyntax = ParseOperands(expression);
-            var source = BuildIntegerExpression(expressionSyntax);
+            var source = BuildExpression(expressionSyntax);
             return Compiler.ExecuteModel(source, arguments);
         }
 
 
-        static Source BuildIntegerExpression(ExpressionSyntax expressionSyntax)
+        static Source BuildExpression(ExpressionSyntax expressionSyntax)
         {
             var source = new Source
             {
@@ -56,6 +56,14 @@ namespace Fondue.Caquelon
                     return new Operand { Expression = new Name { Path = "true", Span = trueSyntax.span } };
                 case PrimitiveSyntax primitiveSyntax:
                     return BuildPrimitive(primitiveSyntax);
+                case IfSyntax ifSyntax:
+                    return new Operand { Expression = new If
+                    {
+                        Condition = BuildExpression(ifSyntax.condition),
+                        Consequent = BuildExpression(ifSyntax.consequent),
+                        Alternative = BuildExpression(ifSyntax.alternative),
+                        Span = ifSyntax.span
+                    } };
                 default:
                     throw new NotImplementedException($"The {operandSyntax.GetType()} is not yet implemented.");
             }
