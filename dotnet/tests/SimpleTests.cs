@@ -3,10 +3,10 @@ using Fondue.Caquelon;
 using System.Linq;
 using System;
 
-namespace tests
+namespace SimpleTest
 {
     [TestClass]
-    public class SimpleTests
+    public class Elementary
     {
         //[TestMethod]
         //public void Boolean()
@@ -29,9 +29,9 @@ namespace tests
         }
 
         [TestMethod]
-        public void AndTest()
+        public void IfTest()
         {
-            Assert.AreEqual(Transpiler.ExecuteIntegerExpression("if (true and true) = (true) then 1 else 0", new string[] { }), 1, "TrueAndTrue");
+            Assert.AreEqual(Transpiler.ExecuteIntegerExpression("if true then 1 else 0", new string[] { }), 1);
         }
     }
 }

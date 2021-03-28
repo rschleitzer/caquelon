@@ -35,7 +35,7 @@ namespace Fondue.Caquelon
             if (source.Functions == null)
                 source.Functions = new List<Function>();
             var main = Modeler.BuildSource("main.scaly").Functions[0];
-            main.Routine.Operation = new Operation { Operands = new List<Operand> { new Operand { Expression = new Scope { Operations = new List<Operation> { BuildOperation(expressionSyntax) } } } } };
+            main.Routine.Operation = new Operation { SourceOperands = new List<Operand> { new Operand { Expression = new Scope { Operations = new List<Operation> { BuildOperation(expressionSyntax) } } } } };
             main.Source = source;
             source.Functions.Add(main);
             return source;
@@ -43,7 +43,7 @@ namespace Fondue.Caquelon
 
         static Operation BuildOperation(ExpressionSyntax expressionSyntax)
         {
-            return new Operation { Operands = expressionSyntax.operands.ToList().ConvertAll(it => BuildOperand(it)) };
+            return new Operation { SourceOperands = expressionSyntax.operands.ToList().ConvertAll(it => BuildOperand(it)) };
         }
 
         static Operand BuildOperand(object operandSyntax)
@@ -59,9 +59,9 @@ namespace Fondue.Caquelon
                 case IfSyntax ifSyntax:
                     return new Operand { Expression = new If
                     {
-                        Condition = BuildExpression(ifSyntax.condition),
-                        Consequent = BuildExpression(ifSyntax.consequent),
-                        Alternative = BuildExpression(ifSyntax.alternative),
+                        Condition = BuildOperation(ifSyntax.condition).SourceOperands,
+                        Consequent = BuildOperation(ifSyntax.consequent),
+                        Alternative = BuildOperation(ifSyntax.alternative),
                         Span = ifSyntax.span
                     } };
                 default:
