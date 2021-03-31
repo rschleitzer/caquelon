@@ -18,13 +18,13 @@ namespace Fondue.Caquelon
 
         public static int ExecuteIntegerExpression(string expression, string[] arguments)
         {
-            var expressionSyntax = ParseOperands(expression);
-            var source = BuildExpression(expressionSyntax);
+            var expressionSyntax = ParseExpression(expression);
+            var elmExpression = Elm.Builder.BuildExpression(expressionSyntax);
+            var source = TranslateExpression(elmExpression);
             return Compiler.ExecuteModel(source, arguments);
         }
 
-
-        static Source BuildExpression(ExpressionSyntax expressionSyntax)
+        static Source TranslateExpression(Elm.Expression expression)
         {
             var source = new Source
             {
@@ -35,62 +35,57 @@ namespace Fondue.Caquelon
             if (source.Functions == null)
                 source.Functions = new List<Function>();
             var main = Modeler.BuildSource("main.scaly").Functions[0];
-            main.Routine.Operation = BuildOperation(expressionSyntax);
+            main.Routine.Operation = CompileExpression(expression);
             main.Source = source;
             source.Functions.Add(main);
             return source;
         }
 
-        static Operation BuildOperation(ExpressionSyntax expressionSyntax)
+        static Operation CompileExpression(Elm.Expression expression)
         {
-            return new Operation { SourceOperands = expressionSyntax.operands.ToList().ConvertAll(it => BuildOperand(it)) };
+            Operand operand;
+            switch (expression)
+            {
+                case Elm.Literal literal:
+                    operand = CompileLiteral(literal);
+                    break;
+                case Elm.If @if:
+                    operand = CompileIf(@if);
+                    break;
+                default:
+                    throw new NotImplementedException($"The {expression.GetType()} is not yet implemented.");
+            }
+            return new Operation { SourceOperands = new List<Operand> { operand } };
         }
 
-        static Operand BuildOperand(object operandSyntax)
+        static Operand CompileIf(Elm.If @if)
         {
-            switch (operandSyntax)
+            return new Operand
             {
-                case FalseSyntax trueSyntax:
-                    return new Operand { Expression = new Name { Path = "false", Span = trueSyntax.span } };
-                case TrueSyntax trueSyntax:
-                    return new Operand { Expression = new Name { Path = "true", Span = trueSyntax.span } };
-                case PrimitiveSyntax primitiveSyntax:
-                    return BuildPrimitive(primitiveSyntax);
-                case IfSyntax ifSyntax:
-                    return new Operand { Expression = new If
-                    {
-                        Condition = BuildOperation(ifSyntax.condition).SourceOperands,
-                        Consequent = BuildOperation(ifSyntax.consequent),
-                        Alternative = BuildOperation(ifSyntax.alternative),
-                        Span = ifSyntax.span
-                    } };
-                case OpenIntervalSyntax openIntervalSyntax:
-                    switch (openIntervalSyntax.end)
-                    {
-                        case OpenEndSyntax _:
-                            if (openIntervalSyntax.components.Length > 1)
-                                throw new NotImplementedException($"Intervals are not yet implemented.");
-                            return new Operand { Expression = BuildOperation(openIntervalSyntax.components[0].expression) };
-                        default:
-                            throw new NotImplementedException($"Intervals are not yet implemented.");
-                    }
+                Expression = new If
+                {
+                    Condition = CompileExpression(@if.Condition).SourceOperands,
+                    Consequent = CompileExpression(@if.Then),
+                    Alternative = CompileExpression(@if.Else),
+                    Span = @if.Span
+                }
+            };
+        }
+
+        static Operand CompileLiteral(Elm.Literal literal)
+        {
+            switch (literal.ValueType)
+            {
+                case "Integer":
+                    return new Operand { Expression = new IntegerConstant { Value = int.Parse(literal.Value), Span = literal.Span } };
+                case "Boolean":
+                    return new Operand { Expression = new Name { Path = "true", Span = literal.Span } };
                 default:
-                    throw new NotImplementedException($"The {operandSyntax.GetType()} is not yet implemented.");
+                    throw new NotImplementedException($"The {literal.ValueType} value type is not yet implemented.");
             }
         }
 
-        static Operand BuildPrimitive(PrimitiveSyntax primitiveSyntax)
-        {
-            switch (primitiveSyntax.literal)
-            {
-                case Integer integer:
-                    return new Operand { Expression = new IntegerConstant { Value = int.Parse(integer.value) } };
-                default:
-                    throw new NotImplementedException($"The {primitiveSyntax.GetType()} is not yet implemented.");
-            }
-        }
-
-        static ExpressionSyntax ParseOperands(string text)
+        static ExpressionSyntax ParseExpression(string text)
         {
             var parser = new Parser(text);
             var expressionSyntax = parser.parse_expression();

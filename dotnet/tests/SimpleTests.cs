@@ -8,13 +8,11 @@ namespace SimpleTest
     [TestClass]
     public class Elementary
     {
-        //[TestMethod]
-        //public void Boolean()
-        //{
-        //    var empty = new string[] { };
-        //    Assert.AreEqual(Transpiler.ExecuteIntegerExpression("false", empty), 0);
-        //    Assert.AreEqual(Transpiler.ExecuteIntegerExpression("true", empty), 1);
-        //}
+        [TestMethod]
+        public void Parser()
+        {
+            Transpiler.BuildLibrary("ParserTest.cql");
+        }
 
         [TestMethod]
         public void Integer()
@@ -23,15 +21,15 @@ namespace SimpleTest
         }
 
         [TestMethod]
-        public void ParserTest()
+        public void If()
         {
-            Transpiler.BuildLibrary("ParserTest.cql");
+            Assert.AreEqual(Transpiler.ExecuteIntegerExpression("if true then 1 else 0", new string[] { }), 1);
         }
 
         [TestMethod]
-        public void IfTest()
+        public void Parenthesized()
         {
-            Assert.AreEqual(Transpiler.ExecuteIntegerExpression("if true then 1 else 0", new string[] { }), 1);
+            Assert.AreEqual(Transpiler.ExecuteIntegerExpression("(42)", new string[] { }), 42);
         }
     }
 }

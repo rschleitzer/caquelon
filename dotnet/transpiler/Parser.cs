@@ -1542,6 +1542,21 @@ namespace Fondue.Caquelon
                     return node;
             }
             {
+                var node = parse_null();
+                if (node != null)
+                    return node;
+            }
+            {
+                var node = parse_false();
+                if (node != null)
+                    return node;
+            }
+            {
+                var node = parse_true();
+                if (node != null)
+                    return node;
+            }
+            {
                 var node = parse_openinterval();
                 if (node != null)
                     return node;
@@ -1575,33 +1590,7 @@ namespace Fondue.Caquelon
             return null;
         }
 
-        public object parse_literal()
-        {
-            {
-                var node = parse_primitive();
-                if (node != null)
-                    return node;
-            }
-            {
-                var node = parse_null();
-                if (node != null)
-                    return node;
-            }
-            {
-                var node = parse_false();
-                if (node != null)
-                    return node;
-            }
-            {
-                var node = parse_true();
-                if (node != null)
-                    return node;
-            }
-
-            return null;
-        }
-
-        public PrimitiveSyntax parse_primitive()
+        public LiteralSyntax parse_literal()
         {
             var start = lexer.get_previous_position();
 
@@ -1613,7 +1602,7 @@ namespace Fondue.Caquelon
 
             var stop = lexer.get_position();
 
-            var ret = new PrimitiveSyntax
+            var ret = new LiteralSyntax
             {
                 span = new Span
                 {
@@ -2321,7 +2310,7 @@ namespace Fondue.Caquelon
         public object[] operands;
     }
 
-    public class PrimitiveSyntax
+    public class LiteralSyntax
     {
         public Span span;
         public Literal literal;

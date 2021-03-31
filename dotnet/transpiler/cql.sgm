@@ -206,6 +206,9 @@
     <syntax id = Operand                      multiple abstract
         <content link = Name
         <content link = Literal
+        <content link = Null
+        <content link = False
+        <content link = True
         <content link = OpenInterval
         <content link = ClosedInterval
         <content link = TupleSelector
@@ -213,13 +216,7 @@
         <content link = And
         <content link = If
 
-    <syntax id = Literal                               abstract
-        <content link = Primitive
-        <content link = Null
-        <content link = False
-        <content link = True
-
-    <syntax id= Primitive
+    <syntax id = Literal
         <content literal                                        property = literal
 
     <syntax id= Null
