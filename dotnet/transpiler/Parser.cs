@@ -1704,6 +1704,8 @@ namespace Fondue.Caquelon
             if (!success_left_paren_1)
                     return null;
             var components = parse_component_list();
+            if (components == null)
+                throw new ParserException("Unable to parse component list.", new Span { file = file_name, start = new Position { line = lexer.previous_line, column = lexer.previous_column }, end = new Position { line = lexer.line, column = lexer.column } } );
             var end = parse_end();
             if (end == null)
                 throw new ParserException("Unable to parse end.", new Span { file = file_name, start = new Position { line = lexer.previous_line, column = lexer.previous_column }, end = new Position { line = lexer.line, column = lexer.column } } );
@@ -1841,6 +1843,8 @@ namespace Fondue.Caquelon
             if (!success_left_bracket_1)
                     return null;
             var components = parse_component_list();
+            if (components == null)
+                throw new ParserException("Unable to parse component list.", new Span { file = file_name, start = new Position { line = lexer.previous_line, column = lexer.previous_column }, end = new Position { line = lexer.line, column = lexer.column } } );
             var end = parse_end();
             if (end == null)
                 throw new ParserException("Unable to parse end.", new Span { file = file_name, start = new Position { line = lexer.previous_line, column = lexer.previous_column }, end = new Position { line = lexer.line, column = lexer.column } } );

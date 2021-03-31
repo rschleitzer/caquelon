@@ -35,7 +35,7 @@ namespace Fondue.Caquelon
             if (source.Functions == null)
                 source.Functions = new List<Function>();
             var main = Modeler.BuildSource("main.scaly").Functions[0];
-            main.Routine.Operation = new Operation { SourceOperands = new List<Operand> { new Operand { Expression = new Scope { Operations = new List<Operation> { BuildOperation(expressionSyntax) } } } } };
+            main.Routine.Operation = BuildOperation(expressionSyntax);
             main.Source = source;
             source.Functions.Add(main);
             return source;
@@ -64,6 +64,16 @@ namespace Fondue.Caquelon
                         Alternative = BuildOperation(ifSyntax.alternative),
                         Span = ifSyntax.span
                     } };
+                case OpenIntervalSyntax openIntervalSyntax:
+                    switch (openIntervalSyntax.end)
+                    {
+                        case OpenEndSyntax _:
+                            if (openIntervalSyntax.components.Length > 1)
+                                throw new NotImplementedException($"Intervals are not yet implemented.");
+                            return new Operand { Expression = BuildOperation(openIntervalSyntax.components[0].expression) };
+                        default:
+                            throw new NotImplementedException($"Intervals are not yet implemented.");
+                    }
                 default:
                     throw new NotImplementedException($"The {operandSyntax.GetType()} is not yet implemented.");
             }

@@ -233,7 +233,7 @@
 
     <syntax id = OpenInterval
         <content link = left_paren
-        <content link = Component             multiple optional property = components
+        <content link = Component             multiple          property = components
         <content link = End                                     property = end
 
     <syntax id = Component                    multiple
@@ -252,7 +252,7 @@
 
     <syntax id = ClosedInterval
         <content link = left_bracket
-        <content link = Component             multiple optional property = components
+        <content link = Component             multiple          property = components
         <content link = End                                     property = end
 
     <syntax id = TupleSelector
