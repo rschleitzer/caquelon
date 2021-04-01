@@ -31,5 +31,11 @@ namespace SimpleTest
         {
             Assert.AreEqual(Transpiler.ExecuteIntegerExpression("(42)", new string[] { }), 42);
         }
+
+        [TestMethod]
+        public void FirstNot()
+        {
+            Assert.AreEqual(Transpiler.ExecuteIntegerExpression(@"if (not true) = (false) then 1 else 0", new string[] { }), 1);
+        }
     }
 }

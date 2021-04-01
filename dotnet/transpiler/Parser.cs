@@ -27,6 +27,7 @@ namespace Fondue.Caquelon
             "if",
             "include",
             "library",
+            "not",
             "parameter",
             "private",
             "public",
@@ -1488,8 +1489,8 @@ namespace Fondue.Caquelon
         public ExpressionSyntax parse_expression()
         {
             var start = lexer.get_previous_position();
-            var operands = parse_operand_list();
-            if (operands == null)
+            var terms = parse_term_list();
+            if (terms == null)
                 return null;
 
             var stop = lexer.get_position();
@@ -1502,18 +1503,18 @@ namespace Fondue.Caquelon
                     start = start,
                     end = stop
                 },
-                operands = operands,
+                terms = terms,
             };
 
             return ret;
         }
 
-        public object[] parse_operand_list()
+        public object[] parse_term_list()
         {
             List<object> list = null;
             while (true)
             {
-                var node = parse_operand();
+                var node = parse_term();
                 if (node == null)
                     break;
 
@@ -1529,7 +1530,7 @@ namespace Fondue.Caquelon
                 return null;
         }
 
-        public object parse_operand()
+        public object parse_term()
         {
             {
                 var node = parse_name();
@@ -1583,6 +1584,11 @@ namespace Fondue.Caquelon
             }
             {
                 var node = parse_if();
+                if (node != null)
+                    return node;
+            }
+            {
+                var node = parse_not();
                 if (node != null)
                     return node;
             }
@@ -2047,6 +2053,33 @@ namespace Fondue.Caquelon
             return ret;
         }
 
+        public NotSyntax parse_not()
+        {
+            var start = lexer.get_previous_position();
+
+            var success_not_1 = lexer.parse_keyword("not");
+            if (!success_not_1)
+                    return null;
+            var expression = parse_expression();
+            if (expression == null)
+                throw new ParserException("Unable to parse expression.", new Span { file = file_name, start = new Position { line = lexer.previous_line, column = lexer.previous_column }, end = new Position { line = lexer.line, column = lexer.column } } );
+
+            var stop = lexer.get_position();
+
+            var ret = new NotSyntax
+            {
+                span = new Span
+                {
+                    file = file_name,
+                    start = start,
+                    end = stop
+                },
+                expression = expression,
+            };
+
+            return ret;
+        }
+
         public bool is_at_end()
         {
             return lexer.is_at_end();
@@ -2307,7 +2340,7 @@ namespace Fondue.Caquelon
     public class ExpressionSyntax
     {
         public Span span;
-        public object[] operands;
+        public object[] terms;
     }
 
     public class LiteralSyntax
@@ -2392,5 +2425,11 @@ namespace Fondue.Caquelon
         public ExpressionSyntax condition;
         public ExpressionSyntax consequent;
         public ExpressionSyntax alternative;
+    }
+
+    public class NotSyntax
+    {
+        public Span span;
+        public ExpressionSyntax expression;
     }
 }

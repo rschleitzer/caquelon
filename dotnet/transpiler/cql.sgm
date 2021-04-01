@@ -201,9 +201,9 @@
         <content link = external
                  
     <syntax id = Expression
-        <content link = Operand               multiple          property = operands
+        <content link = Term                  multiple          property = terms
 
-    <syntax id = Operand                      multiple abstract
+    <syntax id = Term                         multiple abstract
         <content link = Name
         <content link = Literal
         <content link = Null
@@ -215,6 +215,7 @@
         <content link = TupleMembers
         <content link = And
         <content link = If
+        <content link = Not
 
     <syntax id = Literal
         <content literal                                        property = literal
@@ -279,6 +280,10 @@
         <content link = else
         <content link = Expression                              property = alternative
 
+    <syntax id = Not
+        <content link = not
+        <content link = Expression                              property = expression
+
     <keyword id = and
     <keyword id = called
     <keyword id = code
@@ -296,6 +301,7 @@
     <keyword id = if
     <keyword id = include
     <keyword id = library
+    <keyword id = not
     <keyword id = parameter
     <keyword id = private
     <keyword id = public

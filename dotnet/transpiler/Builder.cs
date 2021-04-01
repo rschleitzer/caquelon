@@ -10,7 +10,7 @@ namespace Fondue.Caquelon.Elm
     {
         internal static Expression BuildExpression(ExpressionSyntax expressionSyntax)
         {
-            var operand = expressionSyntax.operands[0];
+            var operand = expressionSyntax.terms[0];
             switch (operand)
             {
                 case LiteralSyntax literalSyntax:
@@ -23,8 +23,10 @@ namespace Fondue.Caquelon.Elm
                     return new Literal { Value = "false", ValueType = "Boolean", Span = falseSyntax.span };
                 case OpenIntervalSyntax openIntervalSyntax:
                     return BuildOpenInterval(openIntervalSyntax);
+                case NotSyntax notSyntax:
+                    return BuildNot(notSyntax);
                 default:
-                    throw new NotImplementedException($"The {expressionSyntax.GetType()} is not yet implemented.");
+                    throw new NotImplementedException($"The {operand.GetType()} is not yet implemented.");
             }
         }
 
@@ -47,6 +49,15 @@ namespace Fondue.Caquelon.Elm
                 Then = BuildExpression(ifSyntax.consequent),
                 Else = BuildExpression(ifSyntax.alternative),
                 Span = ifSyntax.span,
+            };
+        }
+
+        static Expression BuildNot(NotSyntax notSyntax)
+        {
+            return new Not
+            {
+                Expression = BuildExpression(notSyntax.expression),
+                Span = notSyntax.span,
             };
         }
 

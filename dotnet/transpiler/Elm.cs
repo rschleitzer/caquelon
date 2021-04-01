@@ -24,4 +24,9 @@ namespace Fondue.Caquelon.Elm
         public Expression Then;
         public Expression Else;
     }
+
+    public class Not : Expression
+    {
+        public Expression Expression;
+    }
 }

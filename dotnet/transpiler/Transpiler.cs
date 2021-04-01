@@ -43,24 +43,27 @@ namespace Fondue.Caquelon
 
         static Operation CompileExpression(Elm.Expression expression)
         {
-            Operand operand;
+            List<Operand> operands;
             switch (expression)
             {
                 case Elm.Literal literal:
-                    operand = CompileLiteral(literal);
+                    operands = CompileLiteral(literal);
                     break;
                 case Elm.If @if:
-                    operand = CompileIf(@if);
+                    operands = CompileIf(@if);
+                    break;
+                case Elm.Not not:
+                    operands = CompileNot(not);
                     break;
                 default:
                     throw new NotImplementedException($"The {expression.GetType()} is not yet implemented.");
             }
-            return new Operation { SourceOperands = new List<Operand> { operand } };
+            return new Operation { SourceOperands = operands };
         }
 
-        static Operand CompileIf(Elm.If @if)
+        static List<Operand> CompileIf(Elm.If @if)
         {
-            return new Operand
+            return new List<Operand> { new Operand
             {
                 Expression = new If
                 {
@@ -69,17 +72,26 @@ namespace Fondue.Caquelon
                     Alternative = CompileExpression(@if.Else),
                     Span = @if.Span
                 }
+            } };
+        }
+
+        static List<Operand> CompileNot(Elm.Not not)
+        {
+            return new List<Operand>
+            {
+                new Operand { Expression = new Name { Path = "Not", Span = not.Span } },
+                new Operand { Expression = new Scaly.Compiler.Model.Tuple { Components = new List<Component> { new Component { Value = CompileExpression(not.Expression).SourceOperands, Span = not.Expression.Span } } } }
             };
         }
 
-        static Operand CompileLiteral(Elm.Literal literal)
+        static List<Operand> CompileLiteral(Elm.Literal literal)
         {
             switch (literal.ValueType)
             {
                 case "Integer":
-                    return new Operand { Expression = new IntegerConstant { Value = int.Parse(literal.Value), Span = literal.Span } };
+                    return new List<Operand> { new Operand { Expression = new IntegerConstant { Value = int.Parse(literal.Value), Span = literal.Span } } };
                 case "Boolean":
-                    return new Operand { Expression = new Name { Path = "true", Span = literal.Span } };
+                    return new List<Operand> { new Operand { Expression = new Name { Path = "true", Span = literal.Span } } };
                 default:
                     throw new NotImplementedException($"The {literal.ValueType} value type is not yet implemented.");
             }
