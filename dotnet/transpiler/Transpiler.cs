@@ -26,10 +26,12 @@ namespace Fondue.Caquelon
 
         static Source TranslateExpression(Elm.Expression expression)
         {
+            var cql = Modeler.BuildSource("cql.scaly");
             var source = new Source
             {
                 FileName = "",
-                Usings = new List<Namespace> { new Namespace { Path = "Boolean" } },
+                Usings = new List<Namespace> { new Namespace { Path = "CQL" } },
+                Sources = new List<Source> { cql },
             };
 
             if (source.Functions == null)
@@ -79,7 +81,7 @@ namespace Fondue.Caquelon
         {
             return new List<Operand>
             {
-                new Operand { Expression = new Name { Path = "Not", Span = not.Span } },
+                new Operand { Expression = new Name { Path = "not", Span = not.Span } },
                 new Operand { Expression = new Scaly.Compiler.Model.Tuple { Components = new List<Component> { new Component { Value = CompileExpression(not.Expression).SourceOperands, Span = not.Expression.Span } } } }
             };
         }
