@@ -14,7 +14,7 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Scaly.Compiler" Version="0.0.6-beta" />
+    <PackageReference Include="Scaly.Compiler" Version="0.0.7-beta" />
   </ItemGroup>
 
 </Project>
