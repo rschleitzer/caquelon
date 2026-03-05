@@ -5,11 +5,18 @@ namespace Fire.Cql;
 public class ElmInterpreter
 {
     readonly Dictionary<string, object?> _queryScope = new();
+    IResourceStore? _resourceStore;
 
     public static object? Evaluate(string expression)
     {
         var elm = CqlToElmVisitor.Parse(expression);
         return new ElmInterpreter().Eval(elm);
+    }
+
+    public static object? Evaluate(string expression, IResourceStore store)
+    {
+        var elm = CqlToElmVisitor.Parse(expression);
+        return new ElmInterpreter { _resourceStore = store }.Eval(elm);
     }
 
     object? Eval(Elm.Expression? expr)
@@ -194,6 +201,7 @@ public class ElmInterpreter
             Elm.Query q => EvalQuery(q),
             Elm.AliasRef ar => _queryScope.TryGetValue(ar.Name, out var arv) ? arv : null,
             Elm.Instance inst => EvalInstance(inst),
+            Elm.Retrieve ret => EvalRetrieve(ret),
 
             _ => throw new NotSupportedException($"Unsupported ELM expression: {expr.GetType().Name}")
         };
@@ -242,6 +250,17 @@ public class ElmInterpreter
         foreach (var (k, v) in elements)
             t.Elements[k] = v;
         return t;
+    }
+
+    // Retrieve
+
+    object? EvalRetrieve(Elm.Retrieve ret)
+    {
+        if (_resourceStore is null)
+            return new List<object?>();
+        var typeName = ret.DataType?.Name ?? "";
+        var resources = _resourceStore.Retrieve(typeName);
+        return resources.Cast<object?>().ToList();
     }
 
     // Query evaluation
@@ -838,6 +857,8 @@ public class ElmInterpreter
 
     static object? EqualWithNull((object? left, object? right) pair)
     {
+        if (pair.left is ITypedElement lte) pair.left = lte.Value;
+        if (pair.right is ITypedElement rte) pair.right = rte.Value;
         if (pair.left is null || pair.right is null) return null;
         if (IsNullInterval(pair.left) || IsNullInterval(pair.right)) return null;
         if (pair.left is CqlTuple lt && pair.right is CqlTuple rt)
@@ -900,6 +921,8 @@ public class ElmInterpreter
 
     static object? EvalEquivalent((object? left, object? right) pair)
     {
+        if (pair.left is ITypedElement lte) pair.left = lte.Value;
+        if (pair.right is ITypedElement rte) pair.right = rte.Value;
         if (pair.left is null && pair.right is null) return true;
         if (pair.left is null || pair.right is null) return false;
         if (pair.left is string ls && pair.right is string rs)
@@ -923,6 +946,8 @@ public class ElmInterpreter
     object? CompareOp(Elm.BinaryExpression op, Func<int, bool> predicate)
     {
         var (left, right) = EvalBinaryOperands(op);
+        if (left is ITypedElement lte) left = lte.Value;
+        if (right is ITypedElement rte) right = rte.Value;
         // Handle uncertain values (intervals used as scalars)
         if (left is CqlInterval li && right is not CqlInterval)
         {
@@ -1237,6 +1262,8 @@ public class ElmInterpreter
             return i >= 0 && i < list.Count ? list[i] : null;
         if (target is string s && index is int si)
             return si >= 0 && si < s.Length ? s[si].ToString() : null;
+        if (target is ITypedElement te && index is int ti)
+            return te.Index(ti);
         return null;
     }
 
@@ -2977,9 +3004,18 @@ public class ElmInterpreter
 
     object? EvalProperty(Elm.Property prop)
     {
-        var source = Eval(prop.Source);
+        object? source;
+        if (prop.Source is not null)
+            source = Eval(prop.Source);
+        else if (prop.Scope is not null && _queryScope.TryGetValue(prop.Scope, out var sv))
+            source = sv;
+        else
+            return null;
+
         if (source is CqlTuple tuple && tuple.Elements.TryGetValue(prop.Path, out var val))
             return val;
+        if (source is ITypedElement te)
+            return te.Property(prop.Path);
         return null;
     }
 

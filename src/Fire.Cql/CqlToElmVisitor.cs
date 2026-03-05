@@ -970,6 +970,18 @@ public class CqlToElmVisitor : cqlBaseVisitor<Elm.Expression>
 
     // Query support
 
+    public override Elm.Expression VisitRetrieveExpression(cqlParser.RetrieveExpressionContext context)
+        => VisitRetrieve(context.retrieve());
+
+    public override Elm.Expression VisitRetrieve(cqlParser.RetrieveContext context)
+    {
+        var typeName = context.namedTypeSpecifier().GetText();
+        return new Elm.Retrieve
+        {
+            DataType = new System.Xml.XmlQualifiedName(typeName, "urn:hl7-org:elm-types:r1"),
+        };
+    }
+
     public override Elm.Expression VisitQueryExpression(cqlParser.QueryExpressionContext context)
         => Visit(context.query());
 
