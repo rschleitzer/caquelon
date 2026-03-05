@@ -6,6 +6,8 @@ public class HttpResourceStore : IResourceStore
 {
     readonly HttpClient _client;
     readonly string _baseUrl;
+    // Maps propertyPath → searchParamName, per resource type
+    readonly Dictionary<string, Dictionary<string, string>> _pathToParam = new();
 
     public HttpResourceStore(string baseUrl, HttpClient? client = null)
     {
@@ -24,15 +26,76 @@ public class HttpResourceStore : IResourceStore
         var url = $"{_baseUrl}/{Uri.EscapeDataString(resourceType)}";
         if (searchParams.Count > 0)
         {
-            var query = string.Join("&", searchParams.Select(
-                kv => $"{Uri.EscapeDataString(kv.Key)}={Uri.EscapeDataString(kv.Value)}"));
-            url = $"{url}?{query}";
+            var resolved = ResolveSearchParams(resourceType, searchParams);
+            if (resolved.Count > 0)
+            {
+                var query = string.Join("&", resolved.Select(
+                    kv => $"{Uri.EscapeDataString(kv.Key)}={Uri.EscapeDataString(kv.Value)}"));
+                url = $"{url}?{query}";
+            }
         }
         var response = _client.GetAsync(url).GetAwaiter().GetResult();
         if (!response.IsSuccessStatusCode)
             return [];
         var json = response.Content.ReadAsStringAsync().GetAwaiter().GetResult();
         return ParseBundle(json);
+    }
+
+    Dictionary<string, string> ResolveSearchParams(string resourceType, Dictionary<string, string> propertyParams)
+    {
+        var mapping = GetSearchParamMapping(resourceType);
+        var resolved = new Dictionary<string, string>();
+        foreach (var (path, value) in propertyParams)
+        {
+            if (mapping.TryGetValue(path, out var paramName))
+                resolved[paramName] = value;
+        }
+        return resolved;
+    }
+
+    Dictionary<string, string> GetSearchParamMapping(string resourceType)
+    {
+        if (_pathToParam.TryGetValue(resourceType, out var cached))
+            return cached;
+        var mapping = LoadSearchParameters(resourceType);
+        _pathToParam[resourceType] = mapping;
+        return mapping;
+    }
+
+    Dictionary<string, string> LoadSearchParameters(string resourceType)
+    {
+        var result = new Dictionary<string, string>();
+        try
+        {
+            var url = $"{_baseUrl}/SearchParameter?base={Uri.EscapeDataString(resourceType)}";
+            var response = _client.GetAsync(url).GetAwaiter().GetResult();
+            if (!response.IsSuccessStatusCode) return result;
+            var json = response.Content.ReadAsStringAsync().GetAwaiter().GetResult();
+            using var doc = JsonDocument.Parse(json);
+            var root = doc.RootElement;
+
+            if (!root.TryGetProperty("entry", out var entries)) return result;
+            foreach (var entry in entries.EnumerateArray())
+            {
+                var sp = entry.TryGetProperty("resource", out var r) ? r : entry;
+                if (!sp.TryGetProperty("code", out var code)) continue;
+                if (!sp.TryGetProperty("expression", out var expr)) continue;
+                var paramName = code.GetString() ?? "";
+                var expression = expr.GetString() ?? "";
+
+                // Expression like "Patient.name.family | Practitioner.name.family"
+                foreach (var part in expression.Split('|'))
+                {
+                    var trimmed = part.Trim();
+                    var prefix = resourceType + ".";
+                    if (!trimmed.StartsWith(prefix)) continue;
+                    var propertyPath = trimmed[prefix.Length..];
+                    result.TryAdd(propertyPath, paramName);
+                }
+            }
+        }
+        catch { }
+        return result;
     }
 
     static List<ITypedElement> ParseBundle(string json)

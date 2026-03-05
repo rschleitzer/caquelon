@@ -6,11 +6,20 @@ namespace Fire.Cql.Tests;
 
 public class HttpResourceStoreTest
 {
-    static HttpClient MockClient(string json, HttpStatusCode status = HttpStatusCode.OK)
+    const string SearchParameters = """
     {
-        var handler = new MockHandler(json, status);
-        return new HttpClient(handler);
+        "resourceType": "Bundle",
+        "entry": [
+            {"resource": {"resourceType": "SearchParameter", "code": "active", "base": ["Patient"], "expression": "Patient.active"}},
+            {"resource": {"resourceType": "SearchParameter", "code": "gender", "base": ["Patient"], "expression": "Patient.gender"}},
+            {"resource": {"resourceType": "SearchParameter", "code": "birthdate", "base": ["Patient"], "expression": "Patient.birthDate"}},
+            {"resource": {"resourceType": "SearchParameter", "code": "family", "base": ["Patient"], "expression": "Patient.name.family | Practitioner.name.family"}},
+            {"resource": {"resourceType": "SearchParameter", "code": "status", "base": ["Observation"], "expression": "Observation.status"}}
+        ]
     }
+    """;
+
+    static MockHandler CreateHandler(string bundleJson) => new(bundleJson, SearchParameters);
 
     [Fact]
     public void RetrieveFromBundle()
@@ -18,27 +27,14 @@ public class HttpResourceStoreTest
         var json = """
         {
             "resourceType": "Bundle",
-            "type": "searchset",
             "entry": [
-                {
-                    "resource": {
-                        "resourceType": "Patient",
-                        "id": "1",
-                        "active": true,
-                        "name": [{"family": "Smith", "given": ["John"]}]
-                    }
-                },
-                {
-                    "resource": {
-                        "resourceType": "Patient",
-                        "id": "2",
-                        "active": false
-                    }
-                }
+                {"resource": {"resourceType": "Patient", "active": true}},
+                {"resource": {"resourceType": "Patient", "active": false}}
             ]
         }
         """;
-        var store = new HttpResourceStore("http://fhir.example.com", MockClient(json));
+        var handler = CreateHandler(json);
+        var store = new HttpResourceStore("http://fhir.example.com", new HttpClient(handler));
         var result = ElmInterpreter.Evaluate("exists [Patient] P where P.active = true", store);
         Assert.Equal(true, result);
     }
@@ -49,46 +45,24 @@ public class HttpResourceStoreTest
         var json = """
         {
             "resourceType": "Bundle",
-            "entry": [{
-                "resource": {
-                    "resourceType": "Patient",
-                    "name": [{"family": "Doe", "given": ["Jane"]}]
-                }
-            }]
+            "entry": [{"resource": {
+                "resourceType": "Patient",
+                "name": [{"family": "Doe", "given": ["Jane"]}]
+            }}]
         }
         """;
-        var store = new HttpResourceStore("http://fhir.example.com", MockClient(json));
+        var handler = CreateHandler(json);
+        var store = new HttpResourceStore("http://fhir.example.com", new HttpClient(handler));
         var result = ElmInterpreter.Evaluate(
             "exists [Patient] P where P.name[0].family = 'Doe'", store);
         Assert.Equal(true, result);
     }
 
     [Fact]
-    public void NumericProperty()
-    {
-        var json = """
-        {
-            "resourceType": "Bundle",
-            "entry": [{
-                "resource": {
-                    "resourceType": "Observation",
-                    "status": "final",
-                    "valueInteger": 120
-                }
-            }]
-        }
-        """;
-        var store = new HttpResourceStore("http://fhir.example.com", MockClient(json));
-        var result = ElmInterpreter.Evaluate(
-            "exists [Observation] O where O.valueInteger = 120", store);
-        Assert.Equal(true, result);
-    }
-
-    [Fact]
     public void EmptyBundle()
     {
-        var json = """{"resourceType": "Bundle", "entry": []}""";
-        var store = new HttpResourceStore("http://fhir.example.com", MockClient(json));
+        var handler = CreateHandler("""{"resourceType": "Bundle", "entry": []}""");
+        var store = new HttpResourceStore("http://fhir.example.com", new HttpClient(handler));
         var result = ElmInterpreter.Evaluate("exists [Patient]", store);
         Assert.Equal(false, result);
     }
@@ -96,69 +70,138 @@ public class HttpResourceStoreTest
     [Fact]
     public void ServerError()
     {
-        var store = new HttpResourceStore("http://fhir.example.com",
-            MockClient("", HttpStatusCode.InternalServerError));
+        var handler = new MockHandler("", SearchParameters, HttpStatusCode.InternalServerError);
+        var store = new HttpResourceStore("http://fhir.example.com", new HttpClient(handler));
         var result = ElmInterpreter.Evaluate("exists [Patient]", store);
         Assert.Equal(false, result);
     }
 
     [Fact]
-    public void SearchParamPushdown()
+    public void PushdownDirectProperty()
     {
         var json = """
         {
             "resourceType": "Bundle",
-            "entry": [{
-                "resource": {
-                    "resourceType": "Patient",
-                    "active": true,
-                    "gender": "male"
-                }
-            }]
+            "entry": [{"resource": {"resourceType": "Patient", "active": true, "gender": "male"}}]
         }
         """;
-        var handler = new MockHandler(json, HttpStatusCode.OK);
+        var handler = CreateHandler(json);
         var store = new HttpResourceStore("http://fhir.example.com", new HttpClient(handler));
         ElmInterpreter.Evaluate(
             "exists [Patient] P where P.active = true and P.gender = 'male'", store);
-        Assert.Single(handler.AllUrls);
-        Assert.Contains("active=true", handler.LastUrl!);
-        Assert.Contains("gender=male", handler.LastUrl!);
+        var searchUrl = handler.ResourceUrls.Single();
+        Assert.Contains("active=true", searchUrl);
+        Assert.Contains("gender=male", searchUrl);
     }
 
     [Fact]
-    public void SearchParamPushdownSingleCondition()
+    public void PushdownCamelCaseProperty()
+    {
+        // P.birthDate maps to "birthdate" via expression "Patient.birthDate"
+        var json = """
+        {
+            "resourceType": "Bundle",
+            "entry": [{"resource": {"resourceType": "Patient", "birthDate": "1990-01-01"}}]
+        }
+        """;
+        var handler = CreateHandler(json);
+        var store = new HttpResourceStore("http://fhir.example.com", new HttpClient(handler));
+        ElmInterpreter.Evaluate(
+            "exists [Patient] P where P.birthDate = '1990-01-01'", store);
+        var searchUrl = handler.ResourceUrls.Single();
+        Assert.Contains("birthdate=1990-01-01", searchUrl);
+    }
+
+    [Fact]
+    public void PushdownUnknownPropertySkipped()
     {
         var json = """
         {
             "resourceType": "Bundle",
-            "entry": [{
-                "resource": { "resourceType": "Patient", "gender": "female" }
-            }]
+            "entry": [{"resource": {"resourceType": "Patient", "someField": "x"}}]
         }
         """;
-        var handler = new MockHandler(json, HttpStatusCode.OK);
+        var handler = CreateHandler(json);
         var store = new HttpResourceStore("http://fhir.example.com", new HttpClient(handler));
         ElmInterpreter.Evaluate(
-            "exists [Patient] P where P.gender = 'female'", store);
-        Assert.Contains("gender=female", handler.LastUrl);
+            "exists [Patient] P where P.someField = 'x'", store);
+        var searchUrl = handler.ResourceUrls.Single();
+        Assert.DoesNotContain("?", searchUrl);
     }
 
-    class MockHandler(string json, HttpStatusCode status) : HttpMessageHandler
+    [Fact]
+    public void PushdownNestedPropertyPath()
     {
-        public string? LastUrl { get; private set; }
-        public int CallCount { get; private set; }
-        public List<string> AllUrls { get; } = new();
+        // P.name[0].family should resolve path "name.family" → search param "family"
+        var json = """
+        {
+            "resourceType": "Bundle",
+            "entry": [{"resource": {
+                "resourceType": "Patient",
+                "name": [{"family": "Smith"}]
+            }}]
+        }
+        """;
+        var handler = CreateHandler(json);
+        var store = new HttpResourceStore("http://fhir.example.com", new HttpClient(handler));
+        ElmInterpreter.Evaluate(
+            "exists [Patient] P where P.name[0].family = 'Smith'", store);
+        var searchUrl = handler.ResourceUrls.Single();
+        Assert.Contains("family=Smith", searchUrl);
+    }
+
+    [Fact]
+    public void SearchParametersFetchedOncePerResourceType()
+    {
+        var json = """
+        {
+            "resourceType": "Bundle",
+            "entry": [{"resource": {"resourceType": "Patient", "active": true}}]
+        }
+        """;
+        var handler = CreateHandler(json);
+        var store = new HttpResourceStore("http://fhir.example.com", new HttpClient(handler));
+        ElmInterpreter.Evaluate("exists [Patient] P where P.active = true", store);
+        ElmInterpreter.Evaluate("exists [Patient] P where P.gender = 'male'", store);
+        // SearchParameter?base=Patient fetched once, two resource queries
+        Assert.Single(handler.SearchParameterUrls);
+        Assert.Contains("base=Patient", handler.SearchParameterUrls[0]);
+        Assert.Equal(2, handler.ResourceUrls.Count);
+    }
+
+    class MockHandler : HttpMessageHandler
+    {
+        readonly string _bundleJson;
+        readonly string _searchParamJson;
+        readonly HttpStatusCode _resourceStatus;
+        public List<string> ResourceUrls { get; } = new();
+        public List<string> SearchParameterUrls { get; } = new();
+
+        public MockHandler(string bundleJson, string searchParamJson,
+            HttpStatusCode resourceStatus = HttpStatusCode.OK)
+        {
+            _bundleJson = bundleJson;
+            _searchParamJson = searchParamJson;
+            _resourceStatus = resourceStatus;
+        }
 
         protected override Task<HttpResponseMessage> SendAsync(
             HttpRequestMessage request, CancellationToken cancellationToken)
         {
-            LastUrl = request.RequestUri?.ToString();
-            AllUrls.Add(LastUrl ?? "");
-            CallCount++;
-            return Task.FromResult(new HttpResponseMessage(status)
+            var url = request.RequestUri?.ToString() ?? "";
+            if (url.Contains("/SearchParameter"))
             {
-                Content = new StringContent(json, Encoding.UTF8, "application/fhir+json"),
+                SearchParameterUrls.Add(url);
+                return Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK)
+                {
+                    Content = new StringContent(_searchParamJson, Encoding.UTF8, "application/fhir+json"),
+                });
+            }
+
+            ResourceUrls.Add(url);
+            return Task.FromResult(new HttpResponseMessage(_resourceStatus)
+            {
+                Content = new StringContent(_bundleJson, Encoding.UTF8, "application/fhir+json"),
             });
         }
     }

@@ -298,18 +298,38 @@ public class ElmInterpreter
         if (propSide is not Elm.Property prop) return;
         if (valueSide is not Elm.Literal lit) return;
 
-        // Match alias.property (direct property, not nested path)
-        if (prop.Source is Elm.AliasRef ar && ar.Name == alias)
+        var path = BuildPropertyPath(prop, alias);
+        if (path is not null)
+            result.TryAdd(path, lit.Value ?? "");
+    }
+
+    // Walk Property/Indexer chain to build dotted path: P.name[0].family → "name.family"
+    static string? BuildPropertyPath(Elm.Property prop, string alias)
+    {
+        var segments = new List<string> { prop.Path };
+        var current = prop.Source;
+        while (current is not null)
         {
-            var paramName = prop.Path.ToLowerInvariant();
-            var paramValue = lit.Value switch
+            if (current is Elm.AliasRef ar && ar.Name == alias)
+                break;
+            if (current is Elm.Property parent)
             {
-                "true" => "true",
-                "false" => "false",
-                var v => v ?? "",
-            };
-            result.TryAdd(paramName, paramValue);
+                segments.Add(parent.Path);
+                current = parent.Source;
+            }
+            else if (current is Elm.Indexer idx && idx.Operand.Count > 0)
+            {
+                // Skip indexer, continue with its source
+                current = idx.Operand[0];
+            }
+            else
+            {
+                return null; // Can't resolve to alias
+            }
         }
+        if (current is not Elm.AliasRef) return null;
+        segments.Reverse();
+        return string.Join(".", segments);
     }
 
     // Query evaluation
