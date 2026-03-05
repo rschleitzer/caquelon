@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE testsuite [
+
+  <!ELEMENT testsuite (tests+)>
+
+  <!ELEMENT tests (capability*, notes?, group*)>
+  <!ATTLIST tests
+    xmlns:xsi          CDATA     #IMPLIED
+    xmlns              CDATA     #IMPLIED
+    xsi:schemaLocation CDATA     #IMPLIED
+    name               CDATA     #REQUIRED
+    reference          CDATA     #IMPLIED
+    version            CDATA     #IMPLIED
+    versionTo          CDATA     #IMPLIED
+    description        CDATA     #IMPLIED
+  >
+
+  <!ELEMENT capability EMPTY>
+  <!ATTLIST capability
+    code               CDATA     #REQUIRED
+    value              CDATA     #IMPLIED
+  >
+
+  <!ELEMENT notes (#PCDATA)>
+
+  <!ELEMENT group (capability*, notes?, test*)>
+  <!ATTLIST group
+    name               CDATA     #IMPLIED
+    version            CDATA     #IMPLIED
+    versionTo          CDATA     #IMPLIED
+    description        CDATA     #IMPLIED
+    reference          CDATA     #IMPLIED
+  >
+
+  <!ELEMENT test (capability*, expression, output*, notes?)>
+  <!ATTLIST test
+    name               CDATA     #REQUIRED
+    version            CDATA     #IMPLIED
+    versionTo          CDATA     #IMPLIED
+    description        CDATA     #IMPLIED
+    reference          CDATA     #IMPLIED
+    inputfile          CDATA     #IMPLIED
+    predicate          CDATA     #IMPLIED
+    ordered            CDATA     #IMPLIED
+    skipStaticCheck    CDATA     #IMPLIED
+    mode               CDATA     #IMPLIED
+  >
+
+  <!ELEMENT expression (#PCDATA)>
+  <!ATTLIST expression
+    invalid            CDATA     #IMPLIED
+  >
+
+  <!ELEMENT output (#PCDATA)>
+  <!ATTLIST output
+    type               CDATA     #IMPLIED
+  >
+
+  <!ENTITY aggregatefunctions SYSTEM "CqlAggregateFunctionsTest.xml">
+  <!ENTITY aggregatetest SYSTEM "CqlAggregateTest.xml">
+  <!ENTITY arithmeticfunctions SYSTEM "CqlArithmeticFunctionsTest.xml">
+  <!ENTITY comparisonoperators SYSTEM "CqlComparisonOperatorsTest.xml">
+  <!ENTITY conditionaloperators SYSTEM "CqlConditionalOperatorsTest.xml">
+  <!ENTITY datetimeoperators SYSTEM "CqlDateTimeOperatorsTest.xml">
+  <!ENTITY errorsandmessagingoperators SYSTEM "CqlErrorsAndMessagingOperatorsTest.xml">
+  <!ENTITY intervaloperators SYSTEM "CqlIntervalOperatorsTest.xml">
+  <!ENTITY listoperators SYSTEM "CqlListOperatorsTest.xml">
+  <!ENTITY logicaloperators SYSTEM "CqlLogicalOperatorsTest.xml">
+  <!ENTITY nullologicaloperators SYSTEM "CqlNullologicalOperatorsTest.xml">
+  <!ENTITY querytests SYSTEM "CqlQueryTests.xml">
+  <!ENTITY stringoperators SYSTEM "CqlStringOperatorsTest.xml">
+  <!ENTITY typeoperators SYSTEM "CqlTypeOperatorsTest.xml">
+  <!ENTITY typestest SYSTEM "CqlTypesTest.xml">
+  <!ENTITY valueliteralsandselectors SYSTEM "ValueLiteralsAndSelectors.xml">
+]>
+
+<testsuite>
+
+  &aggregatefunctions;
+  &aggregatetest;
+  &arithmeticfunctions;
+  &comparisonoperators;
+  &conditionaloperators;
+  &datetimeoperators;
+  &errorsandmessagingoperators;
+  &intervaloperators;
+  &listoperators;
+  &logicaloperators;
+  &nullologicaloperators;
+  &querytests;
+  &stringoperators;
+  &typeoperators;
+  &typestest;
+  &valueliteralsandselectors;
+
+</testsuite>
