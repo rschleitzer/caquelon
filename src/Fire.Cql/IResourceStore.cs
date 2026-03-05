@@ -3,6 +3,8 @@ namespace Fire.Cql;
 public interface IResourceStore
 {
     List<ITypedElement> Retrieve(string resourceType);
+    List<ITypedElement> Retrieve(string resourceType, Dictionary<string, string> searchParams)
+        => Retrieve(resourceType);
 }
 
 public interface ITypedElement

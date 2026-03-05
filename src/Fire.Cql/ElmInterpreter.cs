@@ -255,23 +255,83 @@ public class ElmInterpreter
     // Retrieve
 
     object? EvalRetrieve(Elm.Retrieve ret)
+        => EvalRetrieve(ret, new Dictionary<string, string>());
+
+    object? EvalRetrieve(Elm.Retrieve ret, Dictionary<string, string> searchParams)
     {
         if (_resourceStore is null)
             return new List<object?>();
         var typeName = ret.DataType?.Name ?? "";
-        var resources = _resourceStore.Retrieve(typeName);
+        var resources = searchParams.Count > 0
+            ? _resourceStore.Retrieve(typeName, searchParams)
+            : _resourceStore.Retrieve(typeName);
         return resources.Cast<object?>().ToList();
+    }
+
+    // Search parameter extraction from Where clause
+
+    static Dictionary<string, string> ExtractSearchParams(Elm.Expression where, string alias)
+    {
+        var result = new Dictionary<string, string>();
+        CollectSearchParams(where, alias, result);
+        return result;
+    }
+
+    static void CollectSearchParams(Elm.Expression expr, string alias, Dictionary<string, string> result)
+    {
+        if (expr is Elm.And and)
+        {
+            CollectSearchParams(and.Operand[0], alias, result);
+            CollectSearchParams(and.Operand[1], alias, result);
+            return;
+        }
+
+        if (expr is Elm.Equal eq && eq.Operand.Count == 2)
+        {
+            TryExtractParam(eq.Operand[0], eq.Operand[1], alias, result);
+            TryExtractParam(eq.Operand[1], eq.Operand[0], alias, result);
+        }
+    }
+
+    static void TryExtractParam(Elm.Expression propSide, Elm.Expression valueSide, string alias, Dictionary<string, string> result)
+    {
+        if (propSide is not Elm.Property prop) return;
+        if (valueSide is not Elm.Literal lit) return;
+
+        // Match alias.property (direct property, not nested path)
+        if (prop.Source is Elm.AliasRef ar && ar.Name == alias)
+        {
+            var paramName = prop.Path.ToLowerInvariant();
+            var paramValue = lit.Value switch
+            {
+                "true" => "true",
+                "false" => "false",
+                var v => v ?? "",
+            };
+            result.TryAdd(paramName, paramValue);
+        }
     }
 
     // Query evaluation
 
     object? EvalQuery(Elm.Query query)
     {
-        // Evaluate source(s)
+        // Evaluate source(s), with search parameter pushdown for Retrieve sources
         var sources = new List<(string alias, List<object?> items)>();
+        var sourceVals = new List<object?>();
         foreach (var src in query.Source)
         {
-            var val = Eval(src.Expression);
+            object? val;
+            if (src.Expression is Elm.Retrieve ret && query.Where is not null && _resourceStore is not null)
+            {
+                var searchParams = ExtractSearchParams(query.Where, src.Alias);
+                val = EvalRetrieve(ret, searchParams);
+            }
+            else
+            {
+                val = Eval(src.Expression);
+            }
+            sourceVals.Add(val);
             var items = val is List<object?> list ? list : new List<object?> { val };
             sources.Add((src.Alias, items));
         }
@@ -350,8 +410,7 @@ public class ElmInterpreter
         // If source was a single non-list value, unwrap to single value
         if (sources.Count == 1 && query.Sort is null)
         {
-            var originalVal = Eval(query.Source[0].Expression);
-            if (originalVal is not List<object?>)
+            if (sourceVals[0] is not List<object?>)
                 return result.Count > 0 ? result[0] : null;
         }
 
