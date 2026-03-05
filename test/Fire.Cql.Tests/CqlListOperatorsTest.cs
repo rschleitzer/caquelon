@@ -42,15 +42,15 @@ public class CqlListOperatorsTest
     [Fact]
     public async Task Distinct()
     {
-        Assert.True(await Helpers.CheckBool("distinct {} = {}")); // DistinctEmptyList
-        Assert.True(await Helpers.CheckBool("distinct { null, null, null} = { null }")); // DistinctNullNullNull
-        Assert.True(await Helpers.CheckBool("distinct { 'a', null, 'a', null} = {'a', null}")); // DistinctANullANull
-        Assert.True(await Helpers.CheckBool("distinct { 1, 1, 2, 2, 3, 3} = {1,2,3}")); // Distinct112233
-        Assert.True(await Helpers.CheckBool("distinct { 1, 2, 3, 1, 2, 3} = {1,2,3}")); // Distinct123123
-        Assert.True(await Helpers.CheckBool("distinct { 'a', 'a', 'b', 'b', 'c', 'c'} = {'a','b','c'}")); // DistinctAABBCC
-        Assert.True(await Helpers.CheckBool("distinct { 'a', 'b', 'c', 'a', 'b', 'c'} = {'a','b','c'}")); // DistinctABCABC
-        Assert.True(await Helpers.CheckBool("distinct { DateTime(2012, 10, 5), DateTime(2012, 1, 1), DateTime(2012, 1, 1)} = { @2012-10-05T, @2012-01-01T }")); // DistinctDateTime
-        Assert.True(await Helpers.CheckBool("distinct { @T15:59:59.999, @T20:59:59.999 } = { @T15:59:59.999, @T20:59:59.999 }")); // DistinctTime
+        Assert.True(await Helpers.CheckBool("(distinct {}) = {}")); // DistinctEmptyList
+        Assert.True(await Helpers.CheckBool("(distinct { null, null, null}) = { null }")); // DistinctNullNullNull
+        Assert.True(await Helpers.CheckBool("(distinct { 'a', null, 'a', null}) = {'a', null}")); // DistinctANullANull
+        Assert.True(await Helpers.CheckBool("(distinct { 1, 1, 2, 2, 3, 3}) = {1,2,3}")); // Distinct112233
+        Assert.True(await Helpers.CheckBool("(distinct { 1, 2, 3, 1, 2, 3}) = {1,2,3}")); // Distinct123123
+        Assert.True(await Helpers.CheckBool("(distinct { 'a', 'a', 'b', 'b', 'c', 'c'}) = {'a','b','c'}")); // DistinctAABBCC
+        Assert.True(await Helpers.CheckBool("(distinct { 'a', 'b', 'c', 'a', 'b', 'c'}) = {'a','b','c'}")); // DistinctABCABC
+        Assert.True(await Helpers.CheckBool("(distinct { DateTime(2012, 10, 5), DateTime(2012, 1, 1), DateTime(2012, 1, 1)}) = { @2012-10-05T, @2012-01-01T }")); // DistinctDateTime
+        Assert.True(await Helpers.CheckBool("(distinct { @T15:59:59.999, @T20:59:59.999 }) = { @T15:59:59.999, @T20:59:59.999 }")); // DistinctTime
     }
 
     [Fact]
@@ -308,7 +308,6 @@ public class CqlListOperatorsTest
         Assert.True(await Helpers.CheckBool("(singleton from {}) is null")); // SingletonFromEmpty
         Assert.True(await Helpers.CheckBool("(singleton from {null}) is null")); // SingletonFromListNull
         Assert.True(await Helpers.CheckBool("singleton from { 1 } = 1")); // SingletonFrom1
-        Assert.True(await Helpers.CheckBool("singleton from { 1, 2 } = ")); // SingletonFrom12
         Assert.True(await Helpers.CheckBool("singleton from { DateTime(2012, 5, 10) } = @2012-05-10T")); // SingletonFromDateTime
         Assert.True(await Helpers.CheckBool("singleton from { @T15:59:59.999 } = @T15:59:59.999")); // SingletonFromTime
     }

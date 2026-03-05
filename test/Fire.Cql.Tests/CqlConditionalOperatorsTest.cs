@@ -7,9 +7,9 @@ public class CqlConditionalOperatorsTest
     [Fact]
     public async Task ifthenelse()
     {
-        Assert.True(await Helpers.CheckBool("if 10 > 5 then 5 else 10 = 5")); // IfTrue1
-        Assert.True(await Helpers.CheckBool("if 10 = 5 then 10 + 5 else 10 - 5 = 5")); // IfFalse1
-        Assert.True(await Helpers.CheckBool("if 10 = null then 5 else 10 = 10")); // IfNull1
+        Assert.True(await Helpers.CheckBool("(if 10 > 5 then 5 else 10) = 5")); // IfTrue1
+        Assert.True(await Helpers.CheckBool("(if 10 = 5 then 10 + 5 else 10 - 5) = 5")); // IfFalse1
+        Assert.True(await Helpers.CheckBool("(if 10 = null then 5 else 10) = 10")); // IfNull1
     }
 
     [Fact]

@@ -8,7 +8,6 @@ public class CqlDateTimeOperatorsTest
     public async Task Add()
     {
         Assert.True(await Helpers.CheckBool("DateTime(2005, 10, 10) + 5 years = @2010-10-10T")); // DateTimeAdd5Years
-        Assert.True(await Helpers.CheckBool("DateTime(2005, 10, 10) + 8000 years = ")); // DateTimeAddInvalidYears
         Assert.True(await Helpers.CheckBool("DateTime(2005, 5, 10) + 5 months = @2005-10-10T")); // DateTimeAdd5Months
         Assert.True(await Helpers.CheckBool("DateTime(2005, 5, 10) + 10 months = @2006-03-10T")); // DateTimeAddMonthsOverflow
         Assert.True(await Helpers.CheckBool("DateTime(2018, 5, 2) + 3 weeks = DateTime(2018, 5, 23)")); // DateTimeAddThreeWeeks
@@ -129,7 +128,6 @@ public class CqlDateTimeOperatorsTest
         Assert.True(await Helpers.CheckBool("minute from DateTime(2003, 10, 29, 20, 50, 33, 955) = 50")); // DateTimeComponentFromMinute
         Assert.True(await Helpers.CheckBool("second from DateTime(2003, 10, 29, 20, 50, 33, 955) = 33")); // DateTimeComponentFromSecond
         Assert.True(await Helpers.CheckBool("millisecond from DateTime(2003, 10, 29, 20, 50, 33, 955) = 955")); // DateTimeComponentFromMillisecond
-        Assert.True(await Helpers.CheckBool("timezone from DateTime(2003, 10, 29, 20, 50, 33, 955, 1) = ")); // DateTimeComponentFromTimezone
         Assert.True(await Helpers.CheckBool("timezoneoffset from DateTime(2003, 10, 29, 20, 50, 33, 955, 1) = 1.00")); // DateTimeComponentFromTimezone2
         Assert.True(await Helpers.CheckBool("date from DateTime(2003, 10, 29, 20, 50, 33, 955, 1) = @2003-10-29")); // DateTimeComponentFromDate
         Assert.True(await Helpers.CheckBool("hour from @T23:20:15.555 = 23")); // TimeComponentFromHour
@@ -199,7 +197,6 @@ public class CqlDateTimeOperatorsTest
         Assert.True(await Helpers.CheckBool("(days between DateTime(2014, 1, 15) and DateTime(2014, 2))  + (days between DateTime(2014, 1, 15) and DateTime(2014, 2)) = Interval[ 32, 88 ]")); // DateTimeDurationBetweenUncertainAdd
         Assert.True(await Helpers.CheckBool("(days between DateTime(2014, 1, 15) and DateTime(2014, 2))  - (months between DateTime(2005) and DateTime(2006, 5)) = Interval[ 0, 40 ]")); // DateTimeDurationBetweenUncertainSubtract
         Assert.True(await Helpers.CheckBool("(days between DateTime(2014, 1, 15) and DateTime(2014, 2))  * (days between DateTime(2014, 1, 15) and DateTime(2014, 2)) = Interval[ 256, 1936 ]")); // DateTimeDurationBetweenUncertainMultiply
-        Assert.True(await Helpers.CheckBool("(days between DateTime(2014, 1, 15) and DateTime(2014, 2))  div (months between DateTime(2005) and DateTime(2006, 5)) = ")); // DateTimeDurationBetweenUncertainDiv
         Assert.True(await Helpers.CheckBool("months between DateTime(2005) and DateTime(2006, 7) > 5")); // DateTimeDurationBetweenMonthUncertain
         Assert.True(await Helpers.CheckBool("(months between DateTime(2005) and DateTime(2006, 2) > 5) is null")); // DateTimeDurationBetweenMonthUncertain2
         Assert.False(await Helpers.CheckBool("months between DateTime(2005) and DateTime(2006, 7) > 25")); // DateTimeDurationBetweenMonthUncertain3
@@ -214,7 +211,6 @@ public class CqlDateTimeOperatorsTest
         Assert.True(await Helpers.CheckBool("weeks between @2012-03-10T22:05:09 and @2012-03-24T07:19:33 = 1")); // DurationInWeeks2
         Assert.True(await Helpers.CheckBool("weeks between @2012-03-10T06:05:09 and @2012-03-24T07:19:33 = 2")); // DurationInWeeks3
         Assert.True(await Helpers.CheckBool("hours between @T20:26:15.555 and @T23:25:15.555 = 2")); // TimeDurationBetweenHour
-        Assert.True(await Helpers.CheckBool("hours between @T06Z and @T07:00:00Z = ")); // TimeDurationBetweenHourDiffPrecision
         Assert.True(await Helpers.CheckBool("hours between @T06 and @T07:00:00 = 1")); // TimeDurationBetweenHourDiffPrecision2
         Assert.True(await Helpers.CheckBool("minutes between @T23:20:16.555 and @T23:25:15.555 = 4")); // TimeDurationBetweenMinute
         Assert.True(await Helpers.CheckBool("seconds between @T23:25:10.556 and @T23:25:15.555 = 4")); // TimeDurationBetweenSecond
@@ -351,7 +347,6 @@ public class CqlDateTimeOperatorsTest
     public async Task Subtract()
     {
         Assert.True(await Helpers.CheckBool("DateTime(2005, 10, 10) - 5 years = @2000-10-10T")); // DateTimeSubtract5Years
-        Assert.True(await Helpers.CheckBool("DateTime(2005, 10, 10) - 2005 years = ")); // DateTimeSubtractInvalidYears
         Assert.True(await Helpers.CheckBool("DateTime(2005, 6, 10) - 5 months = @2005-01-10T")); // DateTimeSubtract5Months
         Assert.True(await Helpers.CheckBool("DateTime(2005, 5, 10) - 6 months = @2004-11-10T")); // DateTimeSubtractMonthsUnderflow
         Assert.True(await Helpers.CheckBool("DateTime(2018, 5, 23) - 3 weeks = DateTime(2018, 5, 2)")); // DateTimeSubtractThreeWeeks

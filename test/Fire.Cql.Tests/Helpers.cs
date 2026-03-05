@@ -4,7 +4,7 @@ public static class Helpers
 {
     public static Task<bool> CheckBool(string expression)
     {
-        // TODO: Parse CQL expression via ANTLR, build ELM, evaluate
-        throw new NotImplementedException();
+        var result = ElmInterpreter.Evaluate(expression);
+        return Task.FromResult(result is true);
     }
 }

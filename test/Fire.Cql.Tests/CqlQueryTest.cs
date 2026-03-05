@@ -24,9 +24,9 @@ public class CqlQueryTest
     [Fact]
     public async Task Aggregate()
     {
-        Assert.True(await Helpers.CheckBool("({1, 2, 3, 3, 4}) L aggregate A starting 1: A * L = 72")); // MultiplyIntegers
-        Assert.True(await Helpers.CheckBool("({1, 2, 3, 3, 4}) L aggregate all A starting 1: A * L = 72")); // MultiplyIntegersAll
-        Assert.True(await Helpers.CheckBool("({1, 2, 3, 3, 4}) L aggregate distinct A starting 1: A * L = 24")); // MultiplyIntegersDistinct
+        Assert.True(await Helpers.CheckBool("(({1, 2, 3, 3, 4}) L aggregate A starting 1: A * L) = 72")); // MultiplyIntegers
+        Assert.True(await Helpers.CheckBool("(({1, 2, 3, 3, 4}) L aggregate all A starting 1: A * L) = 72")); // MultiplyIntegersAll
+        Assert.True(await Helpers.CheckBool("(({1, 2, 3, 3, 4}) L aggregate distinct A starting 1: A * L) = 24")); // MultiplyIntegersDistinct
         Assert.True(await Helpers.CheckBool("(({1, 2, 3}) L aggregate A : A * L) is null")); // MultiplyIntegersNoStartingExpression
         Assert.True(await Helpers.CheckBool("(from ({1, 2, 3}) B, (4) C aggregate A : A + B + C) is null")); // Multi-Source
     }

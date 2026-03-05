@@ -63,49 +63,49 @@ public class CqlIntervalOperatorsTest
     [Fact]
     public async Task Collapse()
     {
-        Assert.True(await Helpers.CheckBool("collapse {Interval(null, null)} = { }")); // TestCollapseNull
-        Assert.True(await Helpers.CheckBool("collapse { Interval[1,5], Interval[3,7], Interval[12,19], Interval[7,10] } = {Interval [ 1, 10 ], Interval [ 12, 19 ]}")); // IntegerIntervalCollapse
-        Assert.True(await Helpers.CheckBool("collapse { Interval[1,2], Interval[3,7], Interval[10,19], Interval[7,10] } = {Interval [ 1, 19 ]}")); // IntegerIntervalCollapse2
-        Assert.True(await Helpers.CheckBool("collapse { Interval[4,6], Interval[7,8] } = {Interval [ 4, 8 ]}")); // IntegerIntervalCollapse3
-        Assert.True(await Helpers.CheckBool("collapse { Interval[1.0,5.0], Interval[3.0,7.0], Interval[12.0,19.0], Interval[7.0,10.0] } = {Interval [ 1.0, 10.0 ], Interval [ 12.0, 19.0 ]}")); // DecimalIntervalCollapse
-        Assert.True(await Helpers.CheckBool("collapse { Interval[4.0,6.0], Interval[6.00000001,8.0] } = {Interval [ 4.0, 8.0 ]}")); // DecimalIntervalCollapse2
-        Assert.True(await Helpers.CheckBool("collapse { Interval[1.0 'g',5.0 'g'], Interval[3.0 'g',7.0 'g'], Interval[12.0 'g',19.0 'g'], Interval[7.0 'g',10.0 'g'] } = {Interval [ 1.0 'g', 10.0 'g' ], Interval [ 12.0 'g', 19.0 'g' ]}")); // QuantityIntervalCollapse
-        Assert.True(await Helpers.CheckBool("collapse { Interval[DateTime(2012, 1, 1), DateTime(2012, 1, 15)], Interval[DateTime(2012, 1, 10), DateTime(2012, 1, 25)], Interval[DateTime(2012, 5, 10), DateTime(2012, 5, 25)], Interval[DateTime(2012, 5, 20), DateTime(2012, 5, 30)] } = {Interval [ @2012-01-01T, @2012-01-25T ], Interval [ @2012-05-10T, @2012-05-30T ]}")); // DateTimeCollapse
-        Assert.True(await Helpers.CheckBool("collapse { Interval[DateTime(2012, 1, 1), DateTime(2012, 1, 15)], Interval[DateTime(2012, 1, 16), DateTime(2012, 5, 25)] } = {Interval [ @2012-01-01T, @2012-05-25T ]}")); // DateTimeCollapse2
-        Assert.True(await Helpers.CheckBool("collapse { Interval[@T01:59:59.999, @T10:59:59.999], Interval[@T08:59:59.999, @T15:59:59.999], Interval[@T17:59:59.999, @T20:59:59.999], Interval[@T18:59:59.999, @T22:59:59.999] } = {Interval [ @T01:59:59.999, @T15:59:59.999 ], Interval [ @T17:59:59.999, @T22:59:59.999 ]}")); // TimeCollapse
-        Assert.True(await Helpers.CheckBool("collapse { Interval[@T01:59:59.999, @T10:59:59.999], Interval[@T11:00:00.000, @T15:59:59.999] } = {Interval [ @T01:59:59.999, @T15:59:59.999 ]}")); // TimeCollapse2
+        Assert.True(await Helpers.CheckBool("(collapse {Interval(null, null)}) = { }")); // TestCollapseNull
+        Assert.True(await Helpers.CheckBool("(collapse { Interval[1,5], Interval[3,7], Interval[12,19], Interval[7,10] }) = {Interval [ 1, 10 ], Interval [ 12, 19 ]}")); // IntegerIntervalCollapse
+        Assert.True(await Helpers.CheckBool("(collapse { Interval[1,2], Interval[3,7], Interval[10,19], Interval[7,10] }) = {Interval [ 1, 19 ]}")); // IntegerIntervalCollapse2
+        Assert.True(await Helpers.CheckBool("(collapse { Interval[4,6], Interval[7,8] }) = {Interval [ 4, 8 ]}")); // IntegerIntervalCollapse3
+        Assert.True(await Helpers.CheckBool("(collapse { Interval[1.0,5.0], Interval[3.0,7.0], Interval[12.0,19.0], Interval[7.0,10.0] }) = {Interval [ 1.0, 10.0 ], Interval [ 12.0, 19.0 ]}")); // DecimalIntervalCollapse
+        Assert.True(await Helpers.CheckBool("(collapse { Interval[4.0,6.0], Interval[6.00000001,8.0] }) = {Interval [ 4.0, 8.0 ]}")); // DecimalIntervalCollapse2
+        Assert.True(await Helpers.CheckBool("(collapse { Interval[1.0 'g',5.0 'g'], Interval[3.0 'g',7.0 'g'], Interval[12.0 'g',19.0 'g'], Interval[7.0 'g',10.0 'g'] }) = {Interval [ 1.0 'g', 10.0 'g' ], Interval [ 12.0 'g', 19.0 'g' ]}")); // QuantityIntervalCollapse
+        Assert.True(await Helpers.CheckBool("(collapse { Interval[DateTime(2012, 1, 1), DateTime(2012, 1, 15)], Interval[DateTime(2012, 1, 10), DateTime(2012, 1, 25)], Interval[DateTime(2012, 5, 10), DateTime(2012, 5, 25)], Interval[DateTime(2012, 5, 20), DateTime(2012, 5, 30)] }) = {Interval [ @2012-01-01T, @2012-01-25T ], Interval [ @2012-05-10T, @2012-05-30T ]}")); // DateTimeCollapse
+        Assert.True(await Helpers.CheckBool("(collapse { Interval[DateTime(2012, 1, 1), DateTime(2012, 1, 15)], Interval[DateTime(2012, 1, 16), DateTime(2012, 5, 25)] }) = {Interval [ @2012-01-01T, @2012-05-25T ]}")); // DateTimeCollapse2
+        Assert.True(await Helpers.CheckBool("(collapse { Interval[@T01:59:59.999, @T10:59:59.999], Interval[@T08:59:59.999, @T15:59:59.999], Interval[@T17:59:59.999, @T20:59:59.999], Interval[@T18:59:59.999, @T22:59:59.999] }) = {Interval [ @T01:59:59.999, @T15:59:59.999 ], Interval [ @T17:59:59.999, @T22:59:59.999 ]}")); // TimeCollapse
+        Assert.True(await Helpers.CheckBool("(collapse { Interval[@T01:59:59.999, @T10:59:59.999], Interval[@T11:00:00.000, @T15:59:59.999] }) = {Interval [ @T01:59:59.999, @T15:59:59.999 ]}")); // TimeCollapse2
     }
 
     [Fact]
     public async Task Expand()
     {
         Assert.True(await Helpers.CheckBool("(expand null) is null")); // ExpandNull
-        Assert.True(await Helpers.CheckBool("expand { } = { }")); // ExpandEmptyList
-        Assert.True(await Helpers.CheckBool("expand { null } = { }")); // ExpandListWithNull
-        Assert.True(await Helpers.CheckBool("expand { Interval[@2018-01-01, @2018-01-04] } per day = { Interval[@2018-01-01, @2018-01-01], Interval[@2018-01-02, @2018-01-02], Interval[@2018-01-03, @2018-01-03], Interval[@2018-01-04, @2018-01-04] }")); // ExpandPerDay
-        Assert.True(await Helpers.CheckBool("expand Interval[@2018-01-01, @2018-01-04] per day = { @2018-01-01, @2018-01-02, @2018-01-03, @2018-01-04 }")); // ExpandPerDayIntervalOverload
-        Assert.True(await Helpers.CheckBool("expand { Interval[@2018-01-01, @2018-01-04] } per 2 days = { Interval[@2018-01-01, @2018-01-02], Interval[@2018-01-03, @2018-01-04] }")); // ExpandPer2Days
-        Assert.True(await Helpers.CheckBool("expand Interval[@2018-01-01, @2018-01-04] per 2 days = { @2018-01-01, @2018-01-03 }")); // ExpandPer2DaysIntervalOverload
-        Assert.True(await Helpers.CheckBool("expand { Interval[@T10:00, @T12:30] } per hour = { Interval[@T10, @T10], Interval[@T11, @T11], Interval[@T12, @T12] }")); // ExpandPerHour
-        Assert.True(await Helpers.CheckBool("expand Interval[@T10:00, @T12:30] per hour = { @T10, @T11, @T12 }")); // ExpandPerHourIntervalOverload
-        Assert.True(await Helpers.CheckBool("expand { Interval[@T10:00, @T12:30) } per hour = { Interval[@T10, @T10], Interval[@T11, @T11], Interval[@T12, @T12] }")); // ExpandPerHourOpen
-        Assert.True(await Helpers.CheckBool("expand Interval[@T10:00, @T12:30) per hour = { @T10, @T11, @T12 }")); // ExpandPerHourOpenIntervalOverload
-        Assert.True(await Helpers.CheckBool("expand { Interval[10.0, 12.5] } per 1 = { Interval[10, 10], Interval[11, 11], Interval[12, 12] }")); // ExpandPer1
-        Assert.True(await Helpers.CheckBool("expand Interval[10.0, 12.5] per 1 = { 10, 11, 12 }")); // ExpandPer1IntervalOverload
-        Assert.True(await Helpers.CheckBool("expand { Interval[10.0, 12.5) } per 1 = { Interval[10, 10], Interval[11, 11], Interval[12, 12] }")); // ExpandPer1Open
-        Assert.True(await Helpers.CheckBool("expand Interval[10.0, 12.5) per 1 = { 10, 11, 12 }")); // ExpandPer1OpenIntervalOverload
-        Assert.True(await Helpers.CheckBool("expand { Interval[@T10, @T10] } per minute = { }")); // ExpandPerMinute
-        Assert.True(await Helpers.CheckBool("expand Interval[@T10, @T10] per minute = { }")); // ExpandPerMinuteIntervalOverload
-        Assert.True(await Helpers.CheckBool("expand { Interval[10, 10] } per 0.1 = { Interval[10.0, 10.0], Interval[10.1, 10.1], Interval[10.2, 10.2], Interval[10.3, 10.3], Interval[10.4, 10.4], Interval[10.5, 10.5], Interval[10.6, 10.6], Interval[10.7, 10.7], Interval[10.8, 10.8], Interval[10.9, 10.9] }")); // ExpandPer0D1
-        Assert.True(await Helpers.CheckBool("expand Interval[10, 10] per 0.1 = { 10.0, 10.1, 10.2, 10.3, 10.4, 10.5, 10.6, 10.7, 10.8, 10.9 }")); // ExpandPer0D1IntervalOverload
-        Assert.True(await Helpers.CheckBool("expand { Interval[1, 10] } = { Interval[1, 1], Interval[2, 2], Interval[3, 3], Interval[4, 4], Interval[5, 5], Interval[6, 6], Interval[7, 7], Interval[8, 8], Interval[9, 9], Interval[10, 10] }")); // ExpandInterval
-        Assert.True(await Helpers.CheckBool("expand Interval[1, 10] = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 }")); // ExpandIntegerIntervalOverload
-        Assert.True(await Helpers.CheckBool("expand { Interval[1, 10) } = { Interval[1, 1], Interval[2, 2], Interval[3, 3], Interval[4, 4], Interval[5, 5], Interval[6, 6], Interval[7, 7], Interval[8, 8], Interval[9, 9] }")); // ExpandIntervalOpen
-        Assert.True(await Helpers.CheckBool("expand Interval[1, 10) = { 1, 2, 3, 4, 5, 6, 7, 8, 9 }")); // ExpandIntegerOpenIntervalOverload
-        Assert.True(await Helpers.CheckBool("expand { Interval[1, 10] } per 2 = { Interval[1, 2], Interval[3, 4], Interval[5, 6], Interval[7, 8], Interval[9, 10] }")); // ExpandIntervalPer2
-        Assert.True(await Helpers.CheckBool("expand Interval[1, 10] per 2 = { 1, 3, 5, 7, 9 }")); // ExpandIntervalPer2IntervalOverload
-        Assert.True(await Helpers.CheckBool("expand { Interval[1, 10) } per 2 = { Interval[1, 2], Interval[3, 4], Interval[5, 6], Interval[7, 8] }")); // ExpandIntervalOpenPer2
-        Assert.True(await Helpers.CheckBool("expand Interval[1, 10) per 2 = { 1, 3, 5, 7 }")); // ExpandIntervalOpenPer2IntervalOverload
+        Assert.True(await Helpers.CheckBool("(expand { }) = { }")); // ExpandEmptyList
+        Assert.True(await Helpers.CheckBool("(expand { null }) = { }")); // ExpandListWithNull
+        Assert.True(await Helpers.CheckBool("(expand { Interval[@2018-01-01, @2018-01-04] } per day) = { Interval[@2018-01-01, @2018-01-01], Interval[@2018-01-02, @2018-01-02], Interval[@2018-01-03, @2018-01-03], Interval[@2018-01-04, @2018-01-04] }")); // ExpandPerDay
+        Assert.True(await Helpers.CheckBool("(expand Interval[@2018-01-01, @2018-01-04] per day) = { @2018-01-01, @2018-01-02, @2018-01-03, @2018-01-04 }")); // ExpandPerDayIntervalOverload
+        Assert.True(await Helpers.CheckBool("(expand { Interval[@2018-01-01, @2018-01-04] } per 2 days) = { Interval[@2018-01-01, @2018-01-02], Interval[@2018-01-03, @2018-01-04] }")); // ExpandPer2Days
+        Assert.True(await Helpers.CheckBool("(expand Interval[@2018-01-01, @2018-01-04] per 2 days) = { @2018-01-01, @2018-01-03 }")); // ExpandPer2DaysIntervalOverload
+        Assert.True(await Helpers.CheckBool("(expand { Interval[@T10:00, @T12:30] } per hour) = { Interval[@T10, @T10], Interval[@T11, @T11], Interval[@T12, @T12] }")); // ExpandPerHour
+        Assert.True(await Helpers.CheckBool("(expand Interval[@T10:00, @T12:30] per hour) = { @T10, @T11, @T12 }")); // ExpandPerHourIntervalOverload
+        Assert.True(await Helpers.CheckBool("(expand { Interval[@T10:00, @T12:30) } per hour) = { Interval[@T10, @T10], Interval[@T11, @T11], Interval[@T12, @T12] }")); // ExpandPerHourOpen
+        Assert.True(await Helpers.CheckBool("(expand Interval[@T10:00, @T12:30) per hour) = { @T10, @T11, @T12 }")); // ExpandPerHourOpenIntervalOverload
+        Assert.True(await Helpers.CheckBool("(expand { Interval[10.0, 12.5] } per 1) = { Interval[10, 10], Interval[11, 11], Interval[12, 12] }")); // ExpandPer1
+        Assert.True(await Helpers.CheckBool("(expand Interval[10.0, 12.5] per 1) = { 10, 11, 12 }")); // ExpandPer1IntervalOverload
+        Assert.True(await Helpers.CheckBool("(expand { Interval[10.0, 12.5) } per 1) = { Interval[10, 10], Interval[11, 11], Interval[12, 12] }")); // ExpandPer1Open
+        Assert.True(await Helpers.CheckBool("(expand Interval[10.0, 12.5) per 1) = { 10, 11, 12 }")); // ExpandPer1OpenIntervalOverload
+        Assert.True(await Helpers.CheckBool("(expand { Interval[@T10, @T10] } per minute) = { }")); // ExpandPerMinute
+        Assert.True(await Helpers.CheckBool("(expand Interval[@T10, @T10] per minute) = { }")); // ExpandPerMinuteIntervalOverload
+        Assert.True(await Helpers.CheckBool("(expand { Interval[10, 10] } per 0.1) = { Interval[10.0, 10.0], Interval[10.1, 10.1], Interval[10.2, 10.2], Interval[10.3, 10.3], Interval[10.4, 10.4], Interval[10.5, 10.5], Interval[10.6, 10.6], Interval[10.7, 10.7], Interval[10.8, 10.8], Interval[10.9, 10.9] }")); // ExpandPer0D1
+        Assert.True(await Helpers.CheckBool("(expand Interval[10, 10] per 0.1) = { 10.0, 10.1, 10.2, 10.3, 10.4, 10.5, 10.6, 10.7, 10.8, 10.9 }")); // ExpandPer0D1IntervalOverload
+        Assert.True(await Helpers.CheckBool("(expand { Interval[1, 10] }) = { Interval[1, 1], Interval[2, 2], Interval[3, 3], Interval[4, 4], Interval[5, 5], Interval[6, 6], Interval[7, 7], Interval[8, 8], Interval[9, 9], Interval[10, 10] }")); // ExpandInterval
+        Assert.True(await Helpers.CheckBool("(expand Interval[1, 10]) = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 }")); // ExpandIntegerIntervalOverload
+        Assert.True(await Helpers.CheckBool("(expand { Interval[1, 10) }) = { Interval[1, 1], Interval[2, 2], Interval[3, 3], Interval[4, 4], Interval[5, 5], Interval[6, 6], Interval[7, 7], Interval[8, 8], Interval[9, 9] }")); // ExpandIntervalOpen
+        Assert.True(await Helpers.CheckBool("(expand Interval[1, 10)) = { 1, 2, 3, 4, 5, 6, 7, 8, 9 }")); // ExpandIntegerOpenIntervalOverload
+        Assert.True(await Helpers.CheckBool("(expand { Interval[1, 10] } per 2) = { Interval[1, 2], Interval[3, 4], Interval[5, 6], Interval[7, 8], Interval[9, 10] }")); // ExpandIntervalPer2
+        Assert.True(await Helpers.CheckBool("(expand Interval[1, 10] per 2) = { 1, 3, 5, 7, 9 }")); // ExpandIntervalPer2IntervalOverload
+        Assert.True(await Helpers.CheckBool("(expand { Interval[1, 10) } per 2) = { Interval[1, 2], Interval[3, 4], Interval[5, 6], Interval[7, 8] }")); // ExpandIntervalOpenPer2
+        Assert.True(await Helpers.CheckBool("(expand Interval[1, 10) per 2) = { 1, 3, 5, 7 }")); // ExpandIntervalOpenPer2IntervalOverload
     }
 
     [Fact]
@@ -552,8 +552,6 @@ public class CqlIntervalOperatorsTest
         Assert.True(await Helpers.CheckBool("(width of (null as Interval<Any>)) is null")); // IntervalTestWidthNull
         Assert.True(await Helpers.CheckBool("width of Interval[4.0, 15.0] = 11.0")); // DecimalIntervalTestWidth11
         Assert.True(await Helpers.CheckBool("width of Interval[5.0 'g', 10.0 'g'] = 5.0'g'")); // QuantityIntervalTestWidth5
-        Assert.True(await Helpers.CheckBool("width of Interval[DateTime(2012, 1, 5), DateTime(2012, 1, 25)] = ")); // DateTimeWidth
-        Assert.True(await Helpers.CheckBool("width of Interval[@T05:59:59.999, @T15:59:59.999] = ")); // TimeWidth
     }
 
     [Fact]
@@ -577,7 +575,5 @@ public class CqlIntervalOperatorsTest
         Assert.True(await Helpers.CheckBool("Interval[@2016-05-01T00:00:00.000, @2016-05-02T00:00:00.000] = Interval[@2016-05-01T00:00:00.000, @2016-05-02T00:00:00.000]")); // DateTimeIntervalTest
         Assert.True(await Helpers.CheckBool("Interval[@T00:00:00.000, @T23:59:59.599] = Interval[@T00:00:00.000, @T23:59:59.599]")); // TimeIntervalTest
         Assert.True(await Helpers.CheckBool("{Interval[1, 10], Interval[11, 20], Interval[44, 50]} = {Interval[1, 10], Interval[11, 20], Interval[44, 50]}")); // CollapseIntervalTestInteger
-        Assert.True(await Helpers.CheckBool("Interval[5, 3] = ")); // InvalidIntegerInterval
-        Assert.True(await Helpers.CheckBool("Interval[5, 5) = ")); // InvalidIntegerIntervalA
     }
 }

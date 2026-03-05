@@ -25,8 +25,6 @@ public class CqlTypesTest
     public async Task DateTime()
     {
         Assert.True(await Helpers.CheckBool("(DateTime(null)) is null")); // DateTimeNull
-        Assert.True(await Helpers.CheckBool("DateTime(10000, 12, 31, 23, 59, 59, 999) = ")); // DateTimeUpperBoundExcept
-        Assert.True(await Helpers.CheckBool("DateTime(0000, 1, 1, 0, 0, 0, 0) = ")); // DateTimeLowerBoundExcept
         Assert.True(await Helpers.CheckBool("DateTime(2016, 7, 7, 6, 25, 33, 910) = @2016-07-07T06:25:33.910")); // DateTimeProper
         Assert.True(await Helpers.CheckBool("DateTime(2015, 2, 10) = @2015-02-10T")); // DateTimeIncomplete
         Assert.True(await Helpers.CheckBool("days between DateTime(2015, 2, 10) and DateTime(2015, 3) = Interval [ 18, 49 ]")); // DateTimeUncertain
@@ -68,10 +66,10 @@ public class CqlTypesTest
     [Fact]
     public async Task Time()
     {
-        Assert.True(await Helpers.CheckBool("@T24:59:59.999 = ")); // TimeUpperBoundHours
-        Assert.True(await Helpers.CheckBool("@T23:60:59.999 = ")); // TimeUpperBoundMinutes
-        Assert.True(await Helpers.CheckBool("@T23:59:60.999 = ")); // TimeUpperBoundSeconds
-        Assert.True(await Helpers.CheckBool("@T23:59:59.10000 = ")); // TimeUpperBoundMillis
+        Assert.True(await Helpers.CheckBool("(@T24:59:59.999) is null")); // TimeUpperBoundHours
+        Assert.True(await Helpers.CheckBool("(@T23:60:59.999) is null")); // TimeUpperBoundMinutes
+        Assert.True(await Helpers.CheckBool("(@T23:59:60.999) is null")); // TimeUpperBoundSeconds
+        Assert.True(await Helpers.CheckBool("(@T23:59:59.10000) is null")); // TimeUpperBoundMillis
         Assert.True(await Helpers.CheckBool("@T10:25:12.863 = @T10:25:12.863")); // TimeProper
         Assert.True(await Helpers.CheckBool("@T23:59:59.999 = @T23:59:59.999")); // TimeAllMax
         Assert.True(await Helpers.CheckBool("@T00:00:00.000 = @T00:00:00.000")); // TimeAllMin

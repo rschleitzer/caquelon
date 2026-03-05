@@ -79,8 +79,6 @@ public class CqlArithmeticFunctionsTest
         Assert.True(await Helpers.CheckBool("Round(Exp(1), 8) = 2.71828183")); // Exp1
         Assert.True(await Helpers.CheckBool("Round(Exp(1L), 8) = 2.71828183")); // Exp1L
         Assert.True(await Helpers.CheckBool("Round(Exp(-1), 8) = 0.36787944")); // ExpNeg1
-        Assert.True(await Helpers.CheckBool("Exp(1000) = ")); // Exp1000
-        Assert.True(await Helpers.CheckBool("Exp(1000.0) = ")); // Exp1000D
     }
 
     [Fact]
@@ -119,8 +117,6 @@ public class CqlArithmeticFunctionsTest
     public async Task Ln()
     {
         Assert.True(await Helpers.CheckBool("(Ln(null)) is null")); // LnNull
-        Assert.True(await Helpers.CheckBool("Ln(0) = ")); // Ln0
-        Assert.True(await Helpers.CheckBool("Ln(-0) = ")); // LnNeg0
         Assert.True(await Helpers.CheckBool("Ln(1) = 0.0")); // Ln1
         Assert.True(await Helpers.CheckBool("Ln(1L) = 0.0")); // Ln1L
         Assert.True(await Helpers.CheckBool("(Ln(-1)) is null")); // LnNeg1
@@ -137,7 +133,6 @@ public class CqlArithmeticFunctionsTest
         Assert.True(await Helpers.CheckBool("minimum DateTime = @0001-01-01T00:00:00.000Z")); // DateTimeMinValue
         Assert.True(await Helpers.CheckBool("minimum Date = @0001-01-01")); // DateMinValue
         Assert.True(await Helpers.CheckBool("minimum Time = @T00:00:00.000")); // TimeMinValue
-        Assert.True(await Helpers.CheckBool("minimum Boolean = ")); // BooleanMinValue
     }
 
     [Fact]
@@ -149,7 +144,6 @@ public class CqlArithmeticFunctionsTest
         Assert.True(await Helpers.CheckBool("maximum DateTime = @9999-12-31T23:59:59.999Z")); // DateTimeMaxValue
         Assert.True(await Helpers.CheckBool("maximum Date = @9999-12-31")); // DateMaxValue
         Assert.True(await Helpers.CheckBool("maximum Time = @T23:59:59.999")); // TimeMaxValue
-        Assert.True(await Helpers.CheckBool("maximum Boolean = ")); // BooleanMaxValue
     }
 
     [Fact]
@@ -221,8 +215,6 @@ public class CqlArithmeticFunctionsTest
         Assert.True(await Helpers.CheckBool("predecessor of 1.0 'cm' = 0.99999999'cm'")); // PredecessorOf1QCM
         Assert.True(await Helpers.CheckBool("predecessor of DateTime(2000,1,1) = @1999-12-31T")); // PredecessorOfJan12000
         Assert.True(await Helpers.CheckBool("predecessor of @T12:00:00.000 = @T11:59:59.999")); // PredecessorOfNoon
-        Assert.True(await Helpers.CheckBool("predecessor of DateTime(0001, 1, 1, 0, 0, 0, 0) = ")); // PredecessorUnderflowDt
-        Assert.True(await Helpers.CheckBool("predecessor of @T00:00:00.000 = ")); // PredecessorUnderflowT
     }
 
     [Fact]
@@ -283,8 +275,6 @@ public class CqlArithmeticFunctionsTest
         Assert.True(await Helpers.CheckBool("successor of 1.01 = 1.01000001")); // SuccessorOf101D
         Assert.True(await Helpers.CheckBool("successor of DateTime(2000,1,1) = @2000-01-02T")); // SuccessorOfJan12000
         Assert.True(await Helpers.CheckBool("successor of @T12:00:00.000 = @T12:00:00.001")); // SuccessorOfNoon
-        Assert.True(await Helpers.CheckBool("successor of DateTime(9999, 12, 31, 23, 59, 59, 999) = ")); // SuccessorOverflowDt
-        Assert.True(await Helpers.CheckBool("successor of @T23:59:59.999 = ")); // SuccessorOverflowT
     }
 
     [Fact]

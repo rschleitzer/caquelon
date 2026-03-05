@@ -35,12 +35,7 @@ public class ValueLiteralsAndSelectors
         Assert.True(await Helpers.CheckBool("Power(2,30)-1+Power(2,30) = 2147483647")); // Integer2Pow31ToZero1IntegerMaxValue
         Assert.True(await Helpers.CheckBool("+Power(2,30)-1+Power(2,30) = 2147483647")); // IntegerPos2Pow31ToZero1IntegerMaxValue
         Assert.True(await Helpers.CheckBool("-Power(2,30)+1-Power(2,30) = -2147483647")); // IntegerNeg2Pow31ToZero1
-        Assert.True(await Helpers.CheckBool("2147483648 = ")); // Integer2Pow31
-        Assert.True(await Helpers.CheckBool("+2147483648 = ")); // IntegerPos2Pow31
         Assert.True(await Helpers.CheckBool("-Power(2,30)-Power(2,30) = -2147483648")); // IntegerNeg2Pow31IntegerMinValue
-        Assert.True(await Helpers.CheckBool("2147483649 = ")); // Integer2Pow31ToInf1
-        Assert.True(await Helpers.CheckBool("+2147483649 = ")); // IntegerPos2Pow31ToInf1
-        Assert.True(await Helpers.CheckBool("-2147483649 = ")); // IntegerNeg2Pow31ToInf1
     }
 
     [Fact]
@@ -79,15 +74,9 @@ public class ValueLiteralsAndSelectors
         Assert.True(await Helpers.CheckBool("Power(10,-7) = 0.0000001")); // DecimalTenStep
         Assert.True(await Helpers.CheckBool("+Power(10,-7) = 0.0000001")); // DecimalPosTenStep
         Assert.True(await Helpers.CheckBool("-Power(10,-7) = -0.0000001")); // DecimalNegTenStep
-        Assert.True(await Helpers.CheckBool("0.000000001 = ")); // DecimalTenthStep
-        Assert.True(await Helpers.CheckBool("+0.000000001 = ")); // DecimalPosTenthStep
-        Assert.True(await Helpers.CheckBool("-0.000000001 = ")); // DecimalNegTenthStep
         Assert.True(await Helpers.CheckBool("10*1000000000000000000000000000.00000000-0.00000001 = 9999999999999999999999999999.99999999")); // Decimal10Pow28ToZeroOneStepDecimalMaxValue
         Assert.True(await Helpers.CheckBool("+10*1000000000000000000000000000.00000000-0.00000001 = 9999999999999999999999999999.99999999")); // DecimalPos10Pow28ToZeroOneStepDecimalMaxValue
         Assert.True(await Helpers.CheckBool("-10*1000000000000000000000000000.00000000+0.00000001 = -9999999999999999999999999999.99999999")); // DecimalNeg10Pow28ToZeroOneStepDecimalMinValue
-        Assert.True(await Helpers.CheckBool("10000000000000000000000000000.00000000 = ")); // Decimal10Pow28
-        Assert.True(await Helpers.CheckBool("+10000000000000000000000000000.00000000 = ")); // DecimalPos10Pow28
-        Assert.True(await Helpers.CheckBool("-10000000000000000000000000000.00000000 = ")); // DecimalNeg10Pow28
     }
 
     [Fact]

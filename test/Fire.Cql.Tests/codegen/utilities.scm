@@ -60,6 +60,17 @@
 (define (escape-csharp-string str)
   (string-replace (string-replace str "\\" "\\\\") "\"" "\\\""))
 
+(define (starts-with? str prefix)
+  (and (>= (string-length str) (string-length prefix))
+       (string=? (substring str 0 (string-length prefix)) prefix)))
+
+(define (string-contains? str substr)
+  (let loop ((pos 0))
+    (cond
+      ((> (+ pos (string-length substr)) (string-length str)) #f)
+      ((string=? (substring str pos (+ pos (string-length substr))) substr) #t)
+      (else (loop (+ pos 1))))))
+
 (define (repl-substring? string target pos)
     (let* (
         (could-match (<= (+ pos (string-length target)) (string-length string)))
