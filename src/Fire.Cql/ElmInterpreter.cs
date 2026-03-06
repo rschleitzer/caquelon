@@ -19,6 +19,15 @@ public class ElmInterpreter
         return new ElmInterpreter { _resourceStore = store }.Eval(elm);
     }
 
+    public static object? Evaluate(string expression, Dictionary<string, object?> context)
+    {
+        var elm = CqlToElmVisitor.Parse(expression);
+        var interp = new ElmInterpreter();
+        foreach (var kvp in context)
+            interp._queryScope[kvp.Key] = kvp.Value;
+        return interp.Eval(elm);
+    }
+
     object? Eval(Elm.Expression? expr)
     {
         if (expr is null) return null;
