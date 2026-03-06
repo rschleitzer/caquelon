@@ -19,7 +19,9 @@ public class HttpResourceStoreTest
     }
     """;
 
+    static int _counter;
     static MockHandler CreateHandler(string bundleJson) => new(bundleJson, SearchParameters);
+    static string UniqueUrl() => $"http://fhir{Interlocked.Increment(ref _counter)}.example.com";
 
     [Fact]
     public void RetrieveFromBundle()
@@ -34,7 +36,7 @@ public class HttpResourceStoreTest
         }
         """;
         var handler = CreateHandler(json);
-        var store = new HttpResourceStore("http://fhir.example.com", new HttpClient(handler));
+        var store = new HttpResourceStore(UniqueUrl(), new HttpClient(handler));
         var result = ElmInterpreter.Evaluate("exists [Patient] P where P.active = true", store);
         Assert.Equal(true, result);
     }
@@ -52,7 +54,7 @@ public class HttpResourceStoreTest
         }
         """;
         var handler = CreateHandler(json);
-        var store = new HttpResourceStore("http://fhir.example.com", new HttpClient(handler));
+        var store = new HttpResourceStore(UniqueUrl(), new HttpClient(handler));
         var result = ElmInterpreter.Evaluate(
             "exists [Patient] P where P.name[0].family = 'Doe'", store);
         Assert.Equal(true, result);
@@ -62,7 +64,7 @@ public class HttpResourceStoreTest
     public void EmptyBundle()
     {
         var handler = CreateHandler("""{"resourceType": "Bundle", "entry": []}""");
-        var store = new HttpResourceStore("http://fhir.example.com", new HttpClient(handler));
+        var store = new HttpResourceStore(UniqueUrl(), new HttpClient(handler));
         var result = ElmInterpreter.Evaluate("exists [Patient]", store);
         Assert.Equal(false, result);
     }
@@ -71,7 +73,7 @@ public class HttpResourceStoreTest
     public void ServerError()
     {
         var handler = new MockHandler("", SearchParameters, HttpStatusCode.InternalServerError);
-        var store = new HttpResourceStore("http://fhir.example.com", new HttpClient(handler));
+        var store = new HttpResourceStore(UniqueUrl(), new HttpClient(handler));
         var result = ElmInterpreter.Evaluate("exists [Patient]", store);
         Assert.Equal(false, result);
     }
@@ -86,7 +88,7 @@ public class HttpResourceStoreTest
         }
         """;
         var handler = CreateHandler(json);
-        var store = new HttpResourceStore("http://fhir.example.com", new HttpClient(handler));
+        var store = new HttpResourceStore(UniqueUrl(), new HttpClient(handler));
         ElmInterpreter.Evaluate(
             "exists [Patient] P where P.active = true and P.gender = 'male'", store);
         var searchUrl = handler.ResourceUrls.Single();
@@ -105,7 +107,7 @@ public class HttpResourceStoreTest
         }
         """;
         var handler = CreateHandler(json);
-        var store = new HttpResourceStore("http://fhir.example.com", new HttpClient(handler));
+        var store = new HttpResourceStore(UniqueUrl(), new HttpClient(handler));
         ElmInterpreter.Evaluate(
             "exists [Patient] P where P.birthDate = '1990-01-01'", store);
         var searchUrl = handler.ResourceUrls.Single();
@@ -122,7 +124,7 @@ public class HttpResourceStoreTest
         }
         """;
         var handler = CreateHandler(json);
-        var store = new HttpResourceStore("http://fhir.example.com", new HttpClient(handler));
+        var store = new HttpResourceStore(UniqueUrl(), new HttpClient(handler));
         ElmInterpreter.Evaluate(
             "exists [Patient] P where P.someField = 'x'", store);
         var searchUrl = handler.ResourceUrls.Single();
@@ -143,7 +145,7 @@ public class HttpResourceStoreTest
         }
         """;
         var handler = CreateHandler(json);
-        var store = new HttpResourceStore("http://fhir.example.com", new HttpClient(handler));
+        var store = new HttpResourceStore(UniqueUrl(), new HttpClient(handler));
         ElmInterpreter.Evaluate(
             "exists [Patient] P where P.name[0].family = 'Smith'", store);
         var searchUrl = handler.ResourceUrls.Single();
@@ -160,7 +162,7 @@ public class HttpResourceStoreTest
         }
         """;
         var handler = CreateHandler(json);
-        var store = new HttpResourceStore("http://fhir.example.com", new HttpClient(handler));
+        var store = new HttpResourceStore(UniqueUrl(), new HttpClient(handler));
         ElmInterpreter.Evaluate("exists [Patient] P where P.active = true", store);
         ElmInterpreter.Evaluate("exists [Patient] P where P.gender = 'male'", store);
         // SearchParameter?base=Patient fetched once, two resource queries

@@ -6,8 +6,8 @@ public class HttpResourceStore : IResourceStore
 {
     readonly HttpClient _client;
     readonly string _baseUrl;
-    // Maps propertyPath → searchParamName, per resource type
-    readonly Dictionary<string, Dictionary<string, string>> _pathToParam = new();
+    // Maps "baseUrl|resourceType" → (propertyPath → searchParamName), shared across instances
+    static readonly Dictionary<string, Dictionary<string, string>> _pathToParam = new();
 
     public HttpResourceStore(string baseUrl, HttpClient? client = null)
     {
@@ -55,10 +55,11 @@ public class HttpResourceStore : IResourceStore
 
     Dictionary<string, string> GetSearchParamMapping(string resourceType)
     {
-        if (_pathToParam.TryGetValue(resourceType, out var cached))
+        var key = $"{_baseUrl}|{resourceType}";
+        if (_pathToParam.TryGetValue(key, out var cached))
             return cached;
         var mapping = LoadSearchParameters(resourceType);
-        _pathToParam[resourceType] = mapping;
+        _pathToParam[key] = mapping;
         return mapping;
     }
 
