@@ -63,6 +63,14 @@ public class FireIntegrationTest : IAsyncLifetime
     }
 
     [Fact]
+    public void ExistsPatientWithFamilyNotNull()
+    {
+        var result = ElmInterpreter.Evaluate(
+            "exists [Patient] P where P.name[0].family is not null", Store());
+        Assert.Equal(true, result);
+    }
+
+    [Fact]
     public void ExistsObservation()
     {
         var result = ElmInterpreter.Evaluate("exists [Observation]", Store());

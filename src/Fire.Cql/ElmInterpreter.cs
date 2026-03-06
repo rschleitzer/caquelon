@@ -290,6 +290,24 @@ public class ElmInterpreter
         {
             TryExtractParam(eq.Operand[0], eq.Operand[1], alias, result);
             TryExtractParam(eq.Operand[1], eq.Operand[0], alias, result);
+            return;
+        }
+
+        // "P.x is null" → x:missing=true
+        if (expr is Elm.IsNull isn && isn.Operand is Elm.Property isNullProp)
+        {
+            var path = BuildPropertyPath(isNullProp, alias);
+            if (path is not null)
+                result.TryAdd(path + ":missing", "true");
+            return;
+        }
+
+        // "P.x is not null" → x:missing=false (Not(IsNull(Property)))
+        if (expr is Elm.Not { Operand: Elm.IsNull innerIsn } && innerIsn.Operand is Elm.Property notNullProp)
+        {
+            var path = BuildPropertyPath(notNullProp, alias);
+            if (path is not null)
+                result.TryAdd(path + ":missing", "false");
         }
     }
 

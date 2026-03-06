@@ -47,7 +47,13 @@ public class HttpResourceStore : IResourceStore
         var resolved = new Dictionary<string, string>();
         foreach (var (path, value) in propertyParams)
         {
-            if (mapping.TryGetValue(path, out var paramName))
+            if (path.EndsWith(":missing"))
+            {
+                var basePath = path[..^":missing".Length];
+                if (mapping.TryGetValue(basePath, out var paramName))
+                    resolved[paramName + ":missing"] = value;
+            }
+            else if (mapping.TryGetValue(path, out var paramName))
                 resolved[paramName] = value;
         }
         return resolved;
