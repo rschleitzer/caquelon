@@ -1,12 +1,35 @@
+using System.Net.Http;
+using System.Text;
 using Xunit;
 
 namespace Fire.Cql.Tests;
 
-public class FireIntegrationTest
+public class FireIntegrationTest : IAsyncLifetime
 {
     const string BaseUrl = "http://localhost:5080/fire";
+    static readonly HttpClient Http = new();
 
     static HttpResourceStore Store() => new(BaseUrl);
+
+    public async Task InitializeAsync()
+    {
+        await CreateResource("Patient", """
+            {"resourceType":"Patient","active":true,"gender":"male",
+             "name":[{"family":"Jackson","given":["Samuel"]}]}
+            """);
+        await CreateResource("Observation", """
+            {"resourceType":"Observation","status":"final",
+             "code":{"coding":[{"system":"http://loinc.org","code":"85354-9"}]}}
+            """);
+    }
+
+    public Task DisposeAsync() => Task.CompletedTask;
+
+    private static async Task CreateResource(string type, string json)
+    {
+        var content = new StringContent(json, Encoding.UTF8, "application/fhir+json");
+        await Http.PostAsync($"{BaseUrl}/{type}", content);
+    }
 
     [Fact]
     public void ExistsPatient()
